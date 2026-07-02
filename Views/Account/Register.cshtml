@@ -1,0 +1,157 @@
+@model medicalapp.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register - MediCloud";
+    Layout = "_Layout";
+}
+
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-box">
+            <h2>Create Account</h2>
+            <p>Register as a patient to access our services.</p>
+
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="ICNumber"></label>
+                        <input asp-for="ICNumber" class="form-control" placeholder="000101-10-1234" />
+                        <span asp-validation-for="ICNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="Gender"></label>
+                        <select asp-for="Gender" class="form-control">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DateOfBirth"></label>
+                    <input asp-for="DateOfBirth" class="form-control" type="date" />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+
+            <div class="auth-links">
+                <p>Already have an account? <a href="@Url.Action("Login")">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        .auth-section {
+            padding: 60px 0;
+            background: #f4f6f9;
+            min-height: 70vh;
+        }
+        .auth-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .auth-box h2 {
+            margin-bottom: 5px;
+            color: #003366;
+        }
+        .auth-box p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .half {
+            flex: 1;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #0056a7;
+        }
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .auth-links a {
+            color: #0056a7;
+            text-decoration: none;
+        }
+        .text-danger {
+            color: #dc3545;
+            font-size: 13px;
+        }
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+        }
+        .form-check-label {
+            margin: 0;
+        }
+    </style>
+
+    
+}
