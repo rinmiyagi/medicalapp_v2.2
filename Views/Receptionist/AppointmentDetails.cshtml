@@ -1,0 +1,154 @@
+@model medicalapp.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="details-container">
+    <div class="container">
+        <h2>📋 Appointment Details</h2>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="details-card">
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Patient</span>
+                    <span class="detail-value">@Model.Patient?.User?.FirstName @Model.Patient?.User?.LastName</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Doctor</span>
+                    <span class="detail-value">Dr. @Model.Doctor?.User?.FirstName @Model.Doctor?.User?.LastName</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date</span>
+                    <span class="detail-value">@Model.AppointmentDate.ToString("dd MMM yyyy")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Time</span>
+                    <span class="detail-value">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="status-badge @Model.Status.ToLower()">@Model.Status</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">@Model.Type</span>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="detail-label">Reason for Visit</span>
+                    <span class="detail-value">@Model.ReasonForVisit</span>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="detail-label">Symptoms</span>
+                    <span class="detail-value">@(string.IsNullOrEmpty(Model.Symptoms) ? "None reported" : Model.Symptoms)</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="@Url.Action("RescheduleAppointment", new { id = Model.Id })" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt"></i> Reschedule
+                </a>
+                <a href="@Url.Action("CancelAppointment", new { id = Model.Id })" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <a href="@Url.Action("AllAppointments")" class="btn btn-outline">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .details-container { padding: 40px 0; }
+        .details-container h2 { color: #003366; margin-bottom: 5px; }
+
+        .details-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 700px;
+            margin-top: 20px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 25px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item.full-width { grid-column: 1 / -1; }
+
+        .detail-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 1rem;
+            color: #003366;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.inprogress { background: #17a2b8; color: white; }
+        .status-badge.completed { background: #6c757d; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+}

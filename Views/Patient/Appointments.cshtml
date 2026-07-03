@@ -1,0 +1,153 @@
+@model List<medicalapp.Models.Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="appointments-container">
+    <div class="container">
+        <h2>📋 My Appointments</h2>
+
+        <div class="filter-tabs">
+            <a href="#" class="filter-tab active" data-filter="all">All</a>
+            <a href="#" class="filter-tab" data-filter="pending">Pending</a>
+            <a href="#" class="filter-tab" data-filter="confirmed">Confirmed</a>
+            <a href="#" class="filter-tab" data-filter="completed">Completed</a>
+            <a href="#" class="filter-tab" data-filter="cancelled">Cancelled</a>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="appointment-list">
+                @foreach (var appt in Model.OrderByDescending(a => a.AppointmentDate))
+                {
+                    <div class="appointment-card">
+                        <div class="appointment-info">
+                            <span class="appt-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
+                            <span class="appt-time">@appt.StartTime.ToString(@"hh\:mm")</span>
+                            <span class="appt-doctor">Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</span>
+                            <span class="appt-department">@appt.Doctor?.Specialization</span>
+                        </div>
+                        <div class="appointment-status">
+                            <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
+                        </div>
+                        <div class="appointment-actions">
+                            <a href="#" class="btn btn-sm btn-outline">View Details</a>
+                            @if (appt.Status == "Pending" || appt.Status == "Confirmed")
+                            {
+                                <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="empty-state">No appointments found.</p>
+        }
+
+        <div class="quick-actions">
+            <a href="@Url.Action("BookAppointment")" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Book New Appointment
+            </a>
+            <a href="@Url.Action("Dashboard")" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .appointments-container {
+            padding: 40px 0;
+        }
+
+        .appointments-container h2 {
+            color: #003366;
+            margin-bottom: 20px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: #f4f6f9;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab:hover {
+            background: #e9ecef;
+        }
+
+        .filter-tab.active {
+            background: #0056a7;
+            color: white;
+        }
+
+        .appointment-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .appointment-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .appt-date { font-weight: 600; color: #003366; }
+        .appt-time { color: #333; }
+        .appt-doctor { color: #0056a7; font-weight: 500; }
+        .appt-department { color: #666; font-size: 0.9rem; }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.completed { background: #17a2b8; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        .quick-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+        }
+
+        .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
+        .btn-danger { background: #dc3545; color: white; border: none; }
+        .btn-danger:hover { background: #c82333; }
+    </style>
+}

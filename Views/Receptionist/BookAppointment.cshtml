@@ -1,0 +1,122 @@
+@model medicalapp.Models.ViewModels.ReceptionistBookAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Book Appointment - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="booking-container">
+    <div class="container">
+        <h2>📅 Book Appointment (Receptionist)</h2>
+        <p class="text-muted">Schedule an appointment for a patient.</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="booking-card">
+            <form asp-action="BookAppointment" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="PatientId"></label>
+                    <select asp-for="PatientId" asp-items="Model.Patients" class="form-control">
+                        <option value="">-- Select Patient --</option>
+                    </select>
+                    <span asp-validation-for="PatientId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DoctorId"></label>
+                    <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
+                        <option value="">-- Select Doctor --</option>
+                    </select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="AppointmentDate"></label>
+                    <input asp-for="AppointmentDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ReasonForVisit"></label>
+                    <input asp-for="ReasonForVisit" class="form-control" placeholder="E.g., Chest pain, follow-up" />
+                    <span asp-validation-for="ReasonForVisit" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Symptoms"></label>
+                    <textarea asp-for="Symptoms" class="form-control" rows="3" placeholder="Describe symptoms (optional)"></textarea>
+                    <span asp-validation-for="Symptoms" class="text-danger"></span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Confirm Booking</button>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .booking-container { padding: 40px 0; }
+        .booking-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .booking-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .text-danger { color: #dc3545; font-size: 0.9rem; }
+    </style>
+}

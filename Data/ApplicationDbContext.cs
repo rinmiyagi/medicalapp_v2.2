@@ -17,6 +17,8 @@ namespace medicalapp.Data
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Prescription> Prescriptions { get; set; }
+        public DbSet<MedicalReportRequest> MedicalReportRequests { get; set; } // NEW
+        public DbSet<MedicalRecord> MedicalRecords { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

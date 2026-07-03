@@ -1,0 +1,179 @@
+@model medicalapp.Models.ViewModels.ReceptionistRegisterPatientViewModel
+
+@{
+    ViewData["Title"] = "Register Patient - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="register-container">
+    <div class="container">
+        <h2>👤 Register New Patient</h2>
+        <p class="text-muted">Create a new patient account.</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="register-card">
+            <form asp-action="RegisterPatient" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="ICNumber"></label>
+                        <input asp-for="ICNumber" class="form-control" placeholder="000101-10-1234" />
+                        <span asp-validation-for="ICNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="Gender"></label>
+                        <select asp-for="Gender" class="form-control">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="DateOfBirth"></label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" class="form-control" type="password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="ConfirmPassword"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr />
+                <h4>Emergency Contact</h4>
+                <p class="text-muted">Optional - can be updated later by the patient.</p>
+
+                <div class="form-group">
+                    <label asp-for="EmergencyContactName"></label>
+                    <input asp-for="EmergencyContactName" class="form-control" placeholder="Emergency contact name" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label asp-for="EmergencyContactPhone"></label>
+                        <input asp-for="EmergencyContactPhone" class="form-control" placeholder="Phone number" />
+                    </div>
+                    <div class="form-group half">
+                        <label asp-for="EmergencyContactRelationship"></label>
+                        <input asp-for="EmergencyContactRelationship" class="form-control" placeholder="Relationship" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Register Patient</button>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .register-container { padding: 40px 0; }
+        .register-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .register-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 700px;
+            margin-top: 25px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .half { flex: 1; }
+        .form-group { margin-bottom: 15px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        hr {
+            margin: 20px 0;
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        h4 { color: #003366; margin-bottom: 10px; }
+
+        .text-danger { color: #dc3545; font-size: 0.9rem; }
+    </style>
+}

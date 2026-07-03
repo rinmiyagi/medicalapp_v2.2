@@ -1,0 +1,173 @@
+@model medicalapp.Models.ViewModels.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "User Details - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="user-details-container">
+    <div class="container">
+        <h2>👤 User Details</h2>
+        <p class="text-muted">View and manage user information and roles</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="details-card">
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Name</span>
+                    <span class="detail-value">@Model.User.FirstName @Model.User.LastName</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">@Model.User.Email</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">IC Number</span>
+                    <span class="detail-value">@Model.User.ICNumber</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Gender</span>
+                    <span class="detail-value">@Model.User.Gender</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date of Birth</span>
+                    <span class="detail-value">@Model.User.DateOfBirth.ToString("dd MMM yyyy")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Created At</span>
+                    <span class="detail-value">@Model.User.CreatedAt.ToString("dd MMM yyyy HH:mm")</span>
+                </div>
+            </div>
+
+            <!-- Role Management -->
+            <div class="role-section">
+                <h3>Role Management</h3>
+                <form asp-action="UpdateRoles" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" value="@Model.User.Id" />
+
+                    <div class="role-checkboxes">
+                        @foreach (var role in Model.AllRoles)
+                        {
+                            <label class="role-checkbox">
+                                <input type="checkbox" name="roles" value="@role" 
+                                       @(Model.CurrentRoles.Contains(role) ? "checked" : "") />
+                                @role
+                            </label>
+                        }
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Update Roles</button>
+                    <a href="@Url.Action("Users")" class="btn btn-outline">Back to Users</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="@Url.Action("Dashboard")" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .user-details-container { padding: 40px 0; }
+        .user-details-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .details-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 700px;
+            margin: 20px 0;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 30px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item { margin-bottom: 5px; }
+        .detail-label { display: block; font-size: 0.85rem; color: #666; font-weight: 500; }
+        .detail-value { display: block; font-size: 1.05rem; color: #003366; font-weight: 500; }
+
+        .role-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .role-section h3 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .role-checkboxes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .role-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .role-checkbox:hover { background: #f4f6f9; }
+
+        .role-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .quick-actions { margin-top: 10px; }
+
+        @@media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .role-checkboxes { flex-direction: column; }
+        }
+    </style>
+}

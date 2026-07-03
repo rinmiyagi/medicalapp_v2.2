@@ -1,0 +1,105 @@
+@model medicalapp.Models.ViewModels.RejectReportRequestViewModel
+
+@{
+    ViewData["Title"] = "Reject Report Request - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="reject-container">
+    <div class="container">
+        <h2>❌ Reject Medical Report Request</h2>
+        <p class="text-muted">
+            Patient: <strong>@Model.PatientName</strong>
+        </p>
+
+        <div class="reject-card">
+            <div class="request-info">
+                <h4>Request Details</h4>
+                <p><strong>Reason:</strong> @Model.Reason</p>
+            </div>
+
+            <form asp-action="RejectReportRequest" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.RequestId" />
+
+                <div class="form-group">
+                    <label>Reason for Rejection</label>
+                    <textarea name="rejectionReason" class="form-control" rows="4" 
+                              placeholder="e.g., Insufficient information, Request out of scope, Please provide more details..." required></textarea>
+                    <small class="text-muted">This message will be sent to the patient.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Confirm Rejection
+                    </button>
+                    <a href="@Url.Action("ReportRequests")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .reject-container { padding: 40px 0; }
+        .reject-container h2 { color: #dc3545; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .reject-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .request-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .request-info h4 { color: #003366; margin-bottom: 10px; }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .text-muted { color: #666; font-size: 0.85rem; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+    </style>
+}

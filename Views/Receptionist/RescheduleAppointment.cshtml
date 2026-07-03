@@ -1,0 +1,154 @@
+@model medicalapp.Models.ViewModels.RescheduleAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Reschedule Appointment - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="reschedule-container">
+    <div class="container">
+        <h2>📅 Reschedule Appointment</h2>
+        <p class="text-muted">Change the date and time for this appointment.</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="reschedule-card">
+            <div class="current-info">
+                <h4>Current Appointment</h4>
+                <div class="info-grid">
+                    <div><strong>Patient:</strong> @Model.PatientName</div>
+                    <div><strong>Doctor:</strong> @Model.DoctorName</div>
+                    <div><strong>Date:</strong> @Model.CurrentDate.ToString("dd MMM yyyy")</div>
+                    <div><strong>Time:</strong> @Model.CurrentStartTime.ToString(@"hh\:mm") - @Model.CurrentEndTime.ToString(@"hh\:mm")</div>
+                </div>
+            </div>
+
+            <form asp-action="RescheduleAppointment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="AppointmentId" />
+
+                <div class="form-section">
+                    <h4>New Appointment Details</h4>
+
+                    <div class="form-group">
+                        <label asp-for="NewAppointmentDate"></label>
+                        <input asp-for="NewAppointmentDate" class="form-control" type="date" />
+                        <span asp-validation-for="NewAppointmentDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label asp-for="NewStartTime"></label>
+                            <input asp-for="NewStartTime" class="form-control" type="time" />
+                            <span asp-validation-for="NewStartTime" class="text-danger"></span>
+                        </div>
+                        <div class="form-group half">
+                            <label asp-for="NewEndTime"></label>
+                            <input asp-for="NewEndTime" class="form-control" type="time" />
+                            <span asp-validation-for="NewEndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="@Url.Action("AppointmentDetails", new { id = Model.AppointmentId })" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .reschedule-container { padding: 40px 0; }
+        .reschedule-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .reschedule-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .current-info {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .current-info h4 {
+            color: #003366;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+        }
+
+        .form-section h4 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .half { flex: 1; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .text-danger { color: #dc3545; font-size: 0.9rem; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+}

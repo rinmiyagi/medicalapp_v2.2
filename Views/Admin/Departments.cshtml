@@ -1,0 +1,145 @@
+@model List<string>
+
+@{
+    ViewData["Title"] = "Manage Departments - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="departments-container">
+    <div class="container">
+        <h2>🏢 Manage Departments</h2>
+        <p class="text-muted">Add, view, or remove medical departments</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="department-form">
+            <form asp-action="AddDepartment" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-row">
+                    <input type="text" name="departmentName" class="form-control" placeholder="Enter department name..." required />
+                    <button type="submit" class="btn btn-primary">Add Department</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="department-list">
+            <h4>Current Departments</h4>
+            @if (Model.Any())
+            {
+                <div class="department-grid">
+                    @foreach (var dept in Model)
+                    {
+                        <div class="department-item">
+                            <span class="dept-name">@dept</span>
+                            <form asp-action="DeleteDepartment" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="departmentName" value="@dept" />
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete @dept?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">No departments added yet.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .departments-container { padding: 40px 0; }
+        .departments-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .department-form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin: 20px 0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .form-control {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0056a7;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
+
+        .department-list { margin-top: 30px; }
+        .department-list h4 { color: #003366; margin-bottom: 15px; }
+
+        .department-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .department-item {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dept-name { font-weight: 500; color: #003366; }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #666;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+}

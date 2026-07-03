@@ -1,0 +1,215 @@
+@model medicalapp.Models.ViewModels.GenerateReportViewModel
+
+@{
+    ViewData["Title"] = "Generate Medical Report - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="report-container">
+    <div class="container">
+        <h2>📄 Generate Medical Report</h2>
+        <p class="text-muted">
+            Patient: <strong>@Model.Patient?.User?.FirstName @Model.Patient?.User?.LastName</strong>
+        </p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="report-card">
+            <form asp-action="GenerateReport" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Request.Id" />
+
+                <div class="section">
+                    <h3>📋 Patient Information</h3>
+                    <div class="info-grid">
+                        <div><strong>Name:</strong> @Model.Patient?.User?.FirstName @Model.Patient?.User?.LastName</div>
+                        <div><strong>Gender:</strong> @Model.Patient?.User?.Gender</div>
+                        <div><strong>Date of Birth:</strong> @Model.Patient?.User?.DateOfBirth.ToString("dd MMM yyyy")</div>
+                        <div><strong>Blood Type:</strong> @(string.IsNullOrEmpty(Model.Patient?.BloodType) ? "Not recorded" : Model.Patient.BloodType)</div>
+                        <div><strong>Allergies:</strong> @(string.IsNullOrEmpty(Model.Patient?.Allergies) ? "None recorded" : Model.Patient.Allergies)</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>📅 Visit History</h3>
+                    @if (Model.Appointments.Any())
+                    {
+                        <div class="appointment-list">
+                            @foreach (var appt in Model.Appointments)
+                            {
+                                <div class="appointment-item">
+                                    <span class="appt-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
+                                    <span class="appt-doctor">Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</span>
+                                    <span class="appt-diagnosis">@(string.IsNullOrEmpty(appt.Diagnosis) ? "No diagnosis recorded" : appt.Diagnosis)</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No past appointments found.</p>
+                    }
+                </div>
+
+                <div class="section">
+                    <h3>💊 Prescription History</h3>
+                    @if (Model.Prescriptions.Any())
+                    {
+                        <div class="prescription-list">
+                            @foreach (var rx in Model.Prescriptions)
+                            {
+                                <div class="prescription-item">
+                                    <span class="rx-name">@rx.MedicationName</span>
+                                    <span class="rx-dosage">@rx.Dosage</span>
+                                    <span class="rx-frequency">@rx.Frequency</span>
+                                    <span class="rx-date">@rx.PrescribedDate.ToString("dd MMM yyyy")</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No prescriptions found.</p>
+                    }
+                </div>
+
+                <div class="section">
+                    <h3>📝 Report Content</h3>
+                    <div class="form-group">
+                        <label>Summary for Patient</label>
+                        <textarea name="summary" class="form-control" rows="3" 
+                                  placeholder="Brief summary for the patient (will be visible to them)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Report (Doctor's Notes)</label>
+                        <textarea name="reportContent" class="form-control" rows="6" 
+                                  placeholder="Detailed medical report content (confidential, for patient's records)"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-file-pdf"></i> Generate & Send Report
+                    </button>
+                    <a href="@Url.Action("ReportRequests")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .report-container { padding: 40px 0; }
+        .report-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .report-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin-top: 25px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .section h3 { color: #003366; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .appointment-item {
+            display: flex;
+            gap: 15px;
+            padding: 8px 12px;
+            background: #f4f6f9;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .appt-date { font-weight: 600; color: #003366; min-width: 120px; }
+        .appt-doctor { color: #0056a7; }
+        .appt-diagnosis { color: #333; }
+
+        .prescription-item {
+            display: flex;
+            gap: 15px;
+            padding: 8px 12px;
+            background: #f4f6f9;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .rx-name { font-weight: 600; color: #003366; }
+        .rx-dosage { color: #333; }
+        .rx-frequency { color: #666; }
+        .rx-date { color: #666; font-size: 0.9rem; }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .text-muted { color: #666; }
+    </style>
+}

@@ -1,0 +1,171 @@
+@model List<medicalapp.Models.Doctor>
+
+@{
+    ViewData["Title"] = "Pending Verifications - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="pending-container">
+    <div class="container">
+        <h2>🔍 Pending Doctor Verifications</h2>
+        <p class="text-muted">Review and verify new doctor registrations</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        @if (Model.Any())
+        {
+            <div class="doctor-list">
+                @foreach (var doctor in Model)
+                {
+                    <div class="doctor-card">
+                        <div class="doctor-info">
+                            <div class="doctor-name">
+                                <i class="fas fa-user-md"></i>
+                                Dr. @doctor.User.FirstName @doctor.User.LastName
+                            </div>
+                            <div class="doctor-details">
+                                <span><strong>Specialization:</strong> @doctor.Specialization</span>
+                                <span><strong>License:</strong> @doctor.LicenseNumber</span>
+                                <span><strong>Department:</strong> @doctor.Department</span>
+                                <span><strong>Experience:</strong> @doctor.YearsOfExperience years</span>
+                                <span><strong>Email:</strong> @doctor.User.Email</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(doctor.LicenseDocumentUrl))
+                            {
+                                <div class="doctor-license">
+                                    <a href="@doctor.LicenseDocumentUrl" target="_blank" class="btn btn-sm btn-outline">
+                                        <i class="fas fa-file-pdf"></i> View License
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                        <div class="doctor-actions">
+                            <form asp-action="VerifyDoctor" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@doctor.Id" />
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Verify
+                                </button>
+                            </form>
+                            <form asp-action="RejectDoctor" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@doctor.Id" />
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this doctor?')">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>No pending verifications. All doctors are verified!</p>
+            </div>
+        }
+
+        <div class="quick-actions">
+            <a href="@Url.Action("Dashboard")" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .pending-container { padding: 40px 0; }
+        .pending-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .doctor-list {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .doctor-card {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .doctor-info { flex: 1; }
+        .doctor-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #003366;
+            margin-bottom: 8px;
+        }
+
+        .doctor-details {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .doctor-details span { background: #f4f6f9; padding: 3px 12px; border-radius: 4px; }
+
+        .doctor-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+        .btn-sm { padding: 4px 12px; font-size: 0.8rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #28a745;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .quick-actions { margin-top: 20px; }
+    </style>
+}

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace medicalapp.Models
 {
+
     public class Appointment
     {
         public int Id { get; set; }
@@ -17,7 +18,6 @@ namespace medicalapp.Models
         [ForeignKey("DoctorId")]
         public Doctor Doctor { get; set; }
 
-        // Appointment Details
         [Required]
         public DateTime AppointmentDate { get; set; }
         [Required]
@@ -27,27 +27,33 @@ namespace medicalapp.Models
         public string Status { get; set; } = "Pending";
         public string Type { get; set; } = "In-Person";
 
-        // Clinical
-        public string ReasonForVisit { get; set; }
-        public string Symptoms { get; set; }
-        public string DoctorNotes { get; set; }
+        // Set default values for all string properties
+        public string ReasonForVisit { get; set; } = string.Empty;
+        public string Symptoms { get; set; } = string.Empty;
+        public string DoctorNotes { get; set; } = string.Empty;
 
-        // Financial
         public decimal ConsultationFee { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal TotalAmount { get; set; }
-        public bool IsPaid { get; set; } = false;
-        public string PaymentMethod { get; set; }
-        public string PaymentReference { get; set; }
+        public bool IsPaid { get; set; }
+
+        public string PaymentMethod { get; set; } = string.Empty;
+        public string PaymentReference { get; set; } = string.Empty;
         public DateTime? PaymentDate { get; set; }
 
-        // Audit
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public string CreatedBy { get; set; }
-        public string UpdatedBy { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
+        public string UpdatedBy { get; set; } = string.Empty;
 
-        // Navigation property - ADD THIS
-        public List<Prescription> Prescriptions { get; set; }
+        public List<Prescription> Prescriptions { get; set; } = new();
+            
+        public string Diagnosis { get; set; } = string.Empty;
+        public string TreatmentPlan { get; set; } = string.Empty;
+        public string ClinicalNotes { get; set; } = string.Empty;
+        public DateTime? ConsultationStart { get; set; }
+        public DateTime? ConsultationEnd { get; set; }
+            
     }
+
 }

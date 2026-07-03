@@ -1,0 +1,135 @@
+@model medicalapp.Models.ViewModels.MedicalReportRequestViewModel
+
+@{
+    ViewData["Title"] = "Request Medical Report - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="request-container">
+    <div class="container">
+        <h2>📄 Request Medical Report</h2>
+        <p class="text-muted">Select a doctor you've seen to request a medical report from them.</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="request-card">
+            <form asp-action="RequestMedicalReport" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Step 1: Select Doctor -->
+                <div class="form-group">
+                    <label asp-for="DoctorId"></label>
+                    <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
+                        <option value="">-- Select a Doctor --</option>
+                    </select>
+                    <span asp-validation-for="DoctorId" class="text-danger"></span>
+                    <small class="text-muted">Only doctors you've had completed or confirmed appointments with are shown.</small>
+                </div>
+
+                <!-- Step 2: Reason -->
+                <div class="form-group">
+                    <label asp-for="Reason"></label>
+                    <textarea asp-for="Reason" class="form-control" rows="4" 
+                              placeholder="e.g., Insurance claim, Second opinion, Personal records..."></textarea>
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                </div>
+
+                <!-- Step 3: Date Range (Optional) -->
+                <div class="form-group">
+                    <label>Date Range (Optional)</label>
+                    <div class="form-row">
+                        <div class="half">
+                            <label>From</label>
+                            <input asp-for="DateFrom" class="form-control" type="date" />
+                        </div>
+                        <div class="half">
+                            <label>To</label>
+                            <input asp-for="DateTo" class="form-control" type="date" />
+                        </div>
+                    </div>
+                    <small class="text-muted">Leave blank to request your full medical history with this doctor.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Request
+                    </button>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .request-container { padding: 40px 0; }
+        .request-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .request-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .half { flex: 1; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .text-danger { color: #dc3545; font-size: 0.9rem; }
+        .text-muted { color: #666; }
+    </style>
+}

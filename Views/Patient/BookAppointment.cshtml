@@ -1,0 +1,220 @@
+@model medicalapp.Models.ViewModels.BookAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Book Appointment - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="booking-container">
+    <div class="container">
+        <h2>📅 Book an Appointment</h2>
+        <p class="text-muted">Select a doctor and choose your preferred date and time.</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+
+        <div class="booking-card">
+            <form asp-action="BookAppointment" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <!-- Step 1: Select Doctor -->
+                <div class="form-step">
+                    <h4>Step 1: Select Doctor</h4>
+                    <div class="form-group">
+                        <label asp-for="DoctorId"></label>
+                        <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
+                            <option value="">-- Select a Doctor --</option>
+                        </select>
+                        <span asp-validation-for="DoctorId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Date & Time -->
+                <div class="form-step">
+                    <h4>Step 2: Select Date & Time</h4>
+                    <div class="form-group">
+                        <label asp-for="AppointmentDate"></label>
+                        <input asp-for="AppointmentDate" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        <small class="form-text text-muted">Please select a date and time (8:00 AM - 8:00 PM).</small>
+                    </div>
+                </div>
+
+                <!-- Step 3: Add Details -->
+                <div class="form-step">
+                    <h4>Step 3: Tell us about your visit</h4>
+                    <div class="form-group">
+                        <label asp-for="ReasonForVisit"></label>
+                        <input asp-for="ReasonForVisit" class="form-control" placeholder="E.g., Chest pain, fever, checkup" />
+                        <span asp-validation-for="ReasonForVisit" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Symptoms"></label>
+                        <textarea asp-for="Symptoms" class="form-control" rows="3" placeholder="Describe your symptoms (optional)"></textarea>
+                        <span asp-validation-for="Symptoms" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="form-step summary">
+                    <h4>Appointment Summary</h4>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Consultation Fee:</span>
+                            <span class="summary-value">RM <span id="feeDisplay">0.00</span></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Tax (6%):</span>
+                            <span class="summary-value">RM <span id="taxDisplay">0.00</span></span>
+                        </div>
+                        <div class="summary-item total">
+                            <span class="summary-label">Total Amount:</span>
+                            <span class="summary-value">RM <span id="totalDisplay">0.00</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check-circle"></i> Confirm Booking
+                    </button>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .booking-container {
+            padding: 40px 0;
+        }
+
+        .booking-container h2 {
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .booking-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 25px;
+            max-width: 700px;
+        }
+
+        .form-step {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .form-step h4 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0056a7;
+        }
+
+        .form-text {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px !important;
+            border-radius: 10px;
+            border-bottom: none !important;
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item.total {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .summary-label { color: #666; }
+        .summary-value { color: #003366; font-weight: 600; }
+        .summary-item.total .summary-value { color: #0056a7; font-size: 1.3rem; }
+
+        .form-actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.9rem;
+        }
+
+        .text-muted {
+            color: #666;
+        }
+    </style>
+}

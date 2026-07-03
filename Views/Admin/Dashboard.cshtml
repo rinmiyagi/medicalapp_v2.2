@@ -1,0 +1,333 @@
+@model medicalapp.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="admin-container">
+    <div class="container">
+        <h2>👑 Admin Dashboard</h2>
+        <p class="text-muted">System overview and management</p>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.TotalUsers</span>
+                    <span class="stat-label">Total Users</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user-md"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.TotalDoctors</span>
+                    <span class="stat-label">Doctors</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-user-injured"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.TotalPatients</span>
+                    <span class="stat-label">Patients</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-calendar-check"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.TotalAppointments</span>
+                    <span class="stat-label">Total Appointments</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.PendingAppointments</span>
+                    <span class="stat-label">Pending Appointments</span>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.PendingVerifications</span>
+                    <span class="stat-label">Pending Verifications</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics-section">
+            <h3>📊 Analytics Overview</h3>
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <canvas id="appointmentChart"></canvas>
+                    <p class="chart-label">Appointments by Status</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                    <p class="chart-label">Monthly Revenue (RM)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="@Url.Action("Users")" class="btn btn-primary">
+                <i class="fas fa-user-cog"></i> Manage Users
+            </a>
+            <a href="@Url.Action("PendingDoctors")" class="btn btn-warning">
+                <i class="fas fa-user-check"></i> Verify Doctors
+                @if (Model.PendingVerifications > 0)
+                {
+                    <span class="badge">@Model.PendingVerifications</span>
+                }
+            </a>
+            <a href="@Url.Action("Settings")" class="btn btn-outline">
+                <i class="fas fa-cog"></i> System Settings
+            </a>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-grid">
+            <!-- Recent Users -->
+            <div class="recent-section">
+                <h3>📋 Recent Users</h3>
+                @if (Model.RecentUsers.Any())
+                {
+                    <div class="recent-list">
+                        @foreach (var user in Model.RecentUsers)
+                        {
+                            <div class="recent-item">
+                                <div class="recent-info">
+                                    <span class="recent-name">@user.FirstName @user.LastName</span>
+                                    <span class="recent-email">@user.Email</span>
+                                </div>
+                                <a href="@Url.Action("UserDetails", new { id = user.Id })" class="btn btn-sm btn-outline">View</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-state">No recent users.</p>
+                }
+                <a href="@Url.Action("Users")" class="btn btn-sm btn-primary">View All Users</a>
+            </div>
+
+            <!-- Recent Appointments -->
+            <div class="recent-section">
+                <h3>📅 Recent Appointments</h3>
+                @if (Model.RecentAppointments.Any())
+                {
+                    <div class="recent-list">
+                        @foreach (var appt in Model.RecentAppointments)
+                        {
+                            <div class="recent-item">
+                                <div class="recent-info">
+                                    <span class="recent-name">@appt.Patient?.User?.FirstName @appt.Patient?.User?.LastName</span>
+                                    <span class="recent-email">with Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</span>
+                                    <span class="recent-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
+                                    <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-state">No recent appointments.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .admin-container { padding: 40px 0; }
+        .admin-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 25px 0 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-card i { font-size: 1.8rem; color: #0056a7; width: 40px; text-align: center; }
+        .stat-card.warning i { color: #ffc107; }
+        .stat-number { font-size: 1.6rem; font-weight: 700; color: #003366; display: block; line-height: 1.2; }
+        .stat-label { color: #666; font-size: 0.85rem; }
+
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+        .btn-sm { padding: 4px 12px; font-size: 0.8rem; }
+
+        .badge {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .recent-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .recent-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .recent-section h3 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .recent-list { margin-bottom: 12px; }
+
+        .recent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f4f6f9;
+        }
+
+        .recent-item:last-child { border-bottom: none; }
+
+        .recent-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .recent-name { font-weight: 500; color: #003366; }
+        .recent-email { color: #666; font-size: 0.9rem; }
+        .recent-date { color: #888; font-size: 0.85rem; }
+
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.inprogress { background: #17a2b8; color: white; }
+        .status-badge.completed { background: #6c757d; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        @@media (max-width: 768px) {
+            .recent-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    
+}
+
+@section Scripts {
+    <script>
+        // Appointment Status Chart
+        const ctx1 = document.getElementById('appointmentChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled'],
+                datasets: [{
+                    data: [
+                        @Model.PendingAppointments,
+                        @Model.TotalAppointments - @Model.PendingAppointments - @Model.PendingAppointments,
+                        0,
+                        @Model.TotalAppointments,
+                        0
+                    ],
+                    backgroundColor: ['#ffc107', '#28a745', '#17a2b8', '#6c757d', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Revenue Chart (Sample data - replace with actual data)
+        const ctx2 = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue (RM)',
+                    data: [12000, 15000, 18000, 14000, 20000, 25000],
+                    backgroundColor: '#0056a7'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,169 @@
+@model List<medicalapp.Models.MedicalReportRequest>
+
+@{
+    ViewData["Title"] = "Medical Report Requests - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="requests-container">
+    <div class="container">
+        <h2>📄 Medical Report Requests</h2>
+        <p class="text-muted">Review and respond to patient report requests</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        @if (Model.Any())
+        {
+            <div class="request-list">
+                @foreach (var request in Model)
+                {
+                    <div class="request-card">
+                        <div class="request-header">
+                            <span class="patient-name">
+                                <i class="fas fa-user"></i>
+                                @request.Patient?.User?.FirstName @request.Patient?.User?.LastName
+                            </span>
+                            <span class="request-status status-@request.Status.ToLower()">@request.Status</span>
+                            <span class="request-date">@request.RequestDate.ToString("dd MMM yyyy")</span>
+                        </div>
+
+                        <div class="request-body">
+                            <p><strong>Reason:</strong> @request.Reason</p>
+                            @if (request.DateFrom.HasValue || request.DateTo.HasValue)
+                            {
+                                <p><strong>Date Range:</strong> 
+                                    @(request.DateFrom?.ToString("dd MMM yyyy") ?? "Start") 
+                                    to 
+                                    @(request.DateTo?.ToString("dd MMM yyyy") ?? "Present")
+                                </p>
+                            }
+                        </div>
+
+                        <div class="request-actions">
+                            @if (request.Status == "Pending")
+                            {
+                                <a href="@Url.Action("GenerateReport", new { id = request.Id })" class="btn btn-success">
+                                    <i class="fas fa-file-medical"></i> Generate Report
+                                </a>
+                                <a href="@Url.Action("RejectReportRequest", new { id = request.Id })" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Reject
+                                </a>
+                            }
+                            <a href="@Url.Action("PatientHistory", new { patientId = request.PatientId })" class="btn btn-outline">
+                                View Patient History
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>No pending report requests</p>
+            </div>
+        }
+
+        <div class="quick-actions">
+            <a href="@Url.Action("Dashboard")" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .requests-container { padding: 40px 0; }
+        .requests-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .request-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .request-header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .patient-name { font-weight: 600; color: #003366; font-size: 1.1rem; }
+        .request-date { color: #666; font-size: 0.9rem; }
+
+        .request-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #ffc107; color: #856404; }
+        .status-approved { background: #28a745; color: white; }
+        .status-rejected { background: #dc3545; color: white; }
+
+        .request-body {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .request-body p { margin: 5px 0; }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .empty-state i { font-size: 3rem; color: #28a745; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .quick-actions { margin-top: 20px; }
+    </style>
+}

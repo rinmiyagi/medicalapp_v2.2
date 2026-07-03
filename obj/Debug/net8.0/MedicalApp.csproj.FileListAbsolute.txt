@@ -151,3 +151,4 @@ C:\DOCUMENT_OFFLINE\SEM5\CLOUD\cloud_asg\MedicalApp\obj\Debug\net8.0\refint\Medi
 C:\DOCUMENT_OFFLINE\SEM5\CLOUD\cloud_asg\MedicalApp\obj\Debug\net8.0\MedicalApp.pdb
 C:\DOCUMENT_OFFLINE\SEM5\CLOUD\cloud_asg\MedicalApp\obj\Debug\net8.0\MedicalApp.genruntimeconfig.cache
 C:\DOCUMENT_OFFLINE\SEM5\CLOUD\cloud_asg\MedicalApp\obj\Debug\net8.0\ref\MedicalApp.dll
+C:\DOCUMENT_OFFLINE\SEM5\CLOUD\cloud_asg\MedicalApp\obj\Debug\net8.0\MedicalApp.sourcelink.json

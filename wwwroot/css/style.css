@@ -49,6 +49,7 @@ body {
     color: #fff;
     border: 2px solid #0056a7;
 }
+
 .btn-primary:hover {
     background: #003d7a;
     border-color: #003d7a;
@@ -61,6 +62,7 @@ body {
     color: #0056a7;
     border: 2px solid #0056a7;
 }
+
 .btn-outline:hover {
     background: #0056a7;
     color: #fff;
@@ -71,6 +73,7 @@ body {
     color: #fff;
     border: 2px solid #fff;
 }
+
 .btn-outline-light:hover {
     background: #fff;
     color: #0056a7;
@@ -149,6 +152,34 @@ body {
 .nav-buttons {
     display: flex;
     gap: 15px;
+    align-items: center;
+}
+
+/* Header Date */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-date {
+    color: #003366;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    background: #f4f6f9;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.header-date i {
+    margin-right: 6px;
+    color: #0056a7;
+}
+
+.navbar-text {
+    color: #333;
+    font-weight: 500;
 }
 
 /* Hero Section */
@@ -377,6 +408,15 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 992px) {
+    .header-date {
+        display: none;
+    }
+    .nav-links {
+        gap: 15px;
+    }
+}
+
 @media (max-width: 768px) {
     .nav-links {
         display: none;
@@ -393,5 +433,9 @@ body {
 
     .package-card.featured {
         transform: scale(1);
+    }
+
+    .nav-right {
+        gap: 10px;
     }
 }

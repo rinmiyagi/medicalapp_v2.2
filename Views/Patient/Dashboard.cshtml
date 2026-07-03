@@ -1,0 +1,250 @@
+@model medicalapp.Models.ViewModels.PatientDashboardViewModel
+
+@{
+    ViewData["Title"] = "My Dashboard - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="patient-container">
+    <div class="container">
+        <h2>Welcome back, @Model.FullName! 👋</h2>
+        <p class="text-muted">Here's a quick overview of your health journey</p>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-calendar-check"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.UpcomingCount</span>
+                    <span class="stat-label">Upcoming Appointments</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-history"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.PastCount</span>
+                    <span class="stat-label">Past Visits</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-prescription"></i>
+                <div class="stat-info">
+                    <span class="stat-number">@Model.ActivePrescriptions.Count</span>
+                    <span class="stat-label">Active Prescriptions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-medical"></i>
+                <div class="stat-info">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Medical Records</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="@Url.Action("BookAppointment")" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Book New Appointment
+            </a>
+            <a href="@Url.Action("Appointments")" class="btn btn-outline">
+                <i class="fas fa-list"></i> View All Appointments
+            </a>
+            <a href="@Url.Action("RequestMedicalReport")" class="btn btn-outline">
+                <i class="fas fa-file-medical"></i> Request Medical Report
+            </a>
+
+
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="section">
+            <h3>📅 Upcoming Appointments</h3>
+            @if (Model.UpcomingAppointments.Any())
+            {
+                <div class="appointment-list">
+                    @foreach (var appt in Model.UpcomingAppointments)
+                    {
+                        <div class="appointment-card">
+                            <div class="appointment-info">
+                                <span class="appt-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
+                                <span class="appt-time">@appt.StartTime.ToString(@"hh\:mm")</span>
+                                <span class="appt-doctor">Dr. @appt.Doctor.User.FirstName @appt.Doctor.User.LastName</span>
+                                <span class="appt-department">@appt.Doctor.Specialization</span>
+                            </div>
+                            <div class="appointment-status">
+                                <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
+                            </div>
+                            <div class="appointment-actions">
+                                <a href="#" class="btn btn-sm btn-outline">View Details</a>
+                                @if (appt.Status == "Pending" || appt.Status == "Confirmed")
+                                {
+                                    <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">No upcoming appointments. <a href="@Url.Action("BookAppointment")">Book one now!</a></p>
+            }
+        </div>
+
+        <!-- Active Prescriptions -->
+        <div class="section">
+            <h3>💊 Active Prescriptions</h3>
+            @if (Model.ActivePrescriptions.Any())
+            {
+                <div class="prescription-list">
+                    @foreach (var rx in Model.ActivePrescriptions)
+                    {
+                        <div class="prescription-card">
+                            <span class="rx-name">@rx.MedicationName</span>
+                            <span class="rx-dosage">@rx.Dosage</span>
+                            <span class="rx-frequency">@rx.Frequency</span>
+                            <span class="rx-duration">@rx.Duration</span>
+                            <span class="rx-status">Active</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">No active prescriptions.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .patient-container {
+            padding: 40px 0;
+        }
+
+        .patient-container h2 {
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            color: #0056a7;
+            width: 45px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #003366;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0 40px;
+            flex-wrap: wrap;
+        }
+
+        .section {
+            margin-top: 40px;
+        }
+
+        .section h3 {
+            color: #003366;
+            margin-bottom: 20px;
+        }
+
+        .appointment-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .appointment-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .appt-date { font-weight: 600; color: #003366; }
+        .appt-time { color: #333; }
+        .appt-doctor { color: #0056a7; font-weight: 500; }
+        .appt-department { color: #666; font-size: 0.9rem; }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.completed { background: #17a2b8; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        .prescription-card {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .rx-name { font-weight: 600; color: #003366; }
+        .rx-dosage { color: #333; }
+        .rx-frequency { color: #666; }
+        .rx-duration { color: #666; }
+        .rx-status { color: #28a745; font-weight: 600; }
+
+        .empty-state {
+            color: #666;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
+        .btn-danger { background: #dc3545; color: white; border: none; }
+        .btn-danger:hover { background: #c82333; }
+    </style>
+}

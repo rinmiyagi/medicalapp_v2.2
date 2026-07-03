@@ -1,0 +1,343 @@
+@model medicalapp.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="details-container">
+    <div class="container">
+        <h2>📋 Appointment Details</h2>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="details-card">
+            <!-- Patient Information -->
+            <div class="section">
+                <h3>👤 Patient Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value">@Model.Patient?.User?.FirstName @Model.Patient?.User?.LastName</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth</span>
+                        <span class="detail-value">@Model.Patient?.User?.DateOfBirth.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Gender</span>
+                        <span class="detail-value">@Model.Patient?.User?.Gender</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">@Model.Patient?.User?.Email</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Blood Type</span>
+                        <span class="detail-value">@(string.IsNullOrEmpty(Model.Patient?.BloodType) ? "Not recorded" : Model.Patient.BloodType)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Allergies</span>
+                        <span class="detail-value">@(string.IsNullOrEmpty(Model.Patient?.Allergies) ? "None recorded" : Model.Patient.Allergies)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Information -->
+            <div class="section">
+                <h3>📅 Appointment Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Date</span>
+                        <span class="detail-value">@Model.AppointmentDate.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Time</span>
+                        <span class="detail-value">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="status-badge @Model.Status.ToLower()">@Model.Status</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Type</span>
+                        <span class="detail-value">@Model.Type</span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Reason for Visit</span>
+                        <span class="detail-value">@Model.ReasonForVisit</span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Symptoms</span>
+                        <span class="detail-value">@(string.IsNullOrEmpty(Model.Symptoms) ? "None reported" : Model.Symptoms)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Notes (Doctor's input) -->
+            @if (Model.Status == "Confirmed" || Model.Status == "InProgress" || Model.Status == "Completed")
+            {
+                <div class="section clinical-section">
+                    <h3>🩺 Clinical Notes</h3>
+                    
+                    <form asp-action="UpdateClinicalNotes" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        
+                        <div class="form-group">
+                            <label>Diagnosis</label>
+                            <input type="text" name="diagnosis" class="form-control" 
+                                   value="@Model.Diagnosis" placeholder="e.g., Hypertension, Diabetes Type 2" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Treatment Plan</label>
+                            <textarea name="treatmentPlan" class="form-control" rows="3" 
+                                      placeholder="e.g., Prescribed Amlodipine 5mg, Follow-up in 2 weeks">@Model.TreatmentPlan</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Clinical Notes</label>
+                            <textarea name="clinicalNotes" class="form-control" rows="4" 
+                                      placeholder="Detailed notes about the consultation">@Model.ClinicalNotes</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">💾 Save Clinical Notes</button>
+                    </form>
+                </div>
+            }
+
+            <!-- Existing Prescriptions -->
+            @if (Model.Prescriptions != null && Model.Prescriptions.Any())
+            {
+                <div class="section">
+                    <h3>💊 Existing Prescriptions</h3>
+                    @foreach (var rx in Model.Prescriptions)
+                    {
+                        <div class="prescription-item">
+                            <div class="rx-info">
+                                <span class="rx-name">@rx.MedicationName</span>
+                                <span class="rx-dosage">@rx.Dosage</span>
+                                <span class="rx-frequency">@rx.Frequency</span>
+                                <span class="rx-status @rx.Status.ToLower()">@rx.Status</span>
+                            </div>
+                            <div class="rx-details">
+                                <span>Duration: @rx.Duration</span>
+                                <span>Qty: @rx.Quantity</span>
+                                <span>Prescribed: @rx.PrescribedDate.ToString("dd MMM yyyy")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="section action-section">
+                <h3>⚡ Actions</h3>
+                <div class="action-buttons">
+                    @if (Model.Status == "Pending")
+                    {
+                        <form asp-action="AcceptAppointment" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                        </form>
+                        <form asp-action="RejectAppointment" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this appointment?')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </form>
+                    }
+                    @if (Model.Status == "Confirmed" || Model.Status == "InProgress")
+                    {
+                        <a href="@Url.Action("Prescribe", new { appointmentId = Model.Id })" class="btn btn-success">
+                            <i class="fas fa-prescription"></i> Prescribe
+                        </a>
+                        <form asp-action="CompleteAppointment" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check-double"></i> Complete Consultation
+                            </button>
+                        </form>
+                    }
+                    <a href="@Url.Action("PatientHistory", new { patientId = Model.PatientId })" class="btn btn-outline">
+                        <i class="fas fa-history"></i> View Patient History
+                    </a>
+                    <a href="@Url.Action("Appointments")" class="btn btn-outline">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .details-container { padding: 40px 0; }
+        .details-container h2 { color: #003366; margin-bottom: 5px; }
+
+        .details-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .section h3 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 30px;
+        }
+
+        .detail-item.full-width { grid-column: 1 / -1; }
+        .detail-item { margin-bottom: 2px; }
+
+        .detail-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            display: block;
+            font-size: 1rem;
+            color: #003366;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.inprogress { background: #17a2b8; color: white; }
+        .status-badge.completed { background: #6c757d; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        /* Clinical Section */
+        .clinical-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        /* Prescriptions */
+        .prescription-item {
+            background: #f4f6f9;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .rx-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .rx-name { font-weight: 600; color: #003366; }
+        .rx-dosage { color: #333; }
+        .rx-frequency { color: #666; }
+        .rx-status { font-weight: 600; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; }
+        .rx-status.active { background: #28a745; color: white; }
+        .rx-status.completed { background: #6c757d; color: white; }
+        .rx-status.cancelled { background: #dc3545; color: white; }
+
+        .rx-details {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Actions */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        @@media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .action-buttons { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+}

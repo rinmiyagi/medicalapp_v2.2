@@ -1,0 +1,118 @@
+@model medicalapp.Models.Appointment
+
+@{
+    ViewData["Title"] = "Cancel Appointment - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="cancel-container">
+    <div class="container">
+        <h2>❌ Cancel Appointment</h2>
+        <p class="text-muted">Are you sure you want to cancel this appointment?</p>
+
+        <div class="cancel-card">
+            <div class="appointment-info">
+                <p><strong>Patient:</strong> @Model.Patient?.User?.FirstName @Model.Patient?.User?.LastName</p>
+                <p><strong>Doctor:</strong> Dr. @Model.Doctor?.User?.FirstName @Model.Doctor?.User?.LastName</p>
+                <p><strong>Date:</strong> @Model.AppointmentDate.ToString("dd MMM yyyy")</p>
+                <p><strong>Time:</strong> @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</p>
+                <p><strong>Status:</strong> <span class="status-badge @Model.Status.ToLower()">@Model.Status</span></p>
+            </div>
+
+            <form asp-action="CancelAppointment" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="form-group">
+                    <label>Cancellation Reason</label>
+                    <textarea name="cancellationReason" class="form-control" rows="3" 
+                              placeholder="e.g., Patient requested, Doctor unavailable, Clinic closed..."></textarea>
+                    <small class="text-muted">This will be recorded for reference.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Confirm Cancel
+                    </button>
+                    <a href="@Url.Action("AppointmentDetails", new { id = Model.Id })" class="btn btn-outline">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .cancel-container { padding: 40px 0; }
+        .cancel-container h2 { color: #dc3545; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .cancel-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .appointment-info {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .appointment-info p { margin: 8px 0; }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .text-muted { color: #666; font-size: 0.85rem; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+    </style>
+}
