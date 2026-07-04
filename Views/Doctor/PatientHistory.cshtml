@@ -1,0 +1,659 @@
+@model medicalapp.Models.ViewModels.PatientMedicalRecordViewModel
+
+@{
+    ViewData["Title"] = "Patient Medical Record - MediCloud";
+    Layout = "_Layout";
+    var activeTab = ViewBag.ActiveTab as string ?? "profile";
+}
+
+<div class="emr-container">
+    <div class="container">
+        <!-- Patient Header -->
+        <div class="patient-header">
+            <div class="patient-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="patient-info">
+                <h2>@Model.User?.FirstName @Model.User?.LastName</h2>
+                <div class="patient-meta">
+                    <span><i class="fas fa-id-card"></i> @Model.User?.ICNumber</span>
+                    <span><i class="fas fa-calendar-alt"></i> @Model.User?.DateOfBirth.ToString("dd MMM yyyy") (@(DateTime.Now.Year - Model.User.DateOfBirth.Year) years)</span>
+                    <span><i class="fas fa-venus-mars"></i> @Model.User?.Gender</span>
+                    <span><i class="fas fa-tint"></i> @(string.IsNullOrEmpty(Model.Patient?.BloodType) ? "Unknown" : Model.Patient.BloodType)</span>
+                </div>
+            </div>
+            <div class="patient-stats">
+                <div class="stat-item">
+                    <span class="stat-number">@Model.TotalVisits</span>
+                    <span class="stat-label">Total Visits</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.ActivePrescriptions</span>
+                    <span class="stat-label">Active Meds</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Appointments.Count</span>
+                    <span class="stat-label">All Appointments</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Access Level Notification -->
+        <div class="access-notification">
+            @if (Model.HasActiveReferral)
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-share-alt"></i> 
+                    <strong>Referral Access:</strong> You have been referred this patient. 
+                    Level 2 data (ADHD, X-Rays) is visible.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-lock"></i> 
+                    <strong>Limited Access:</strong> You only have access to Level 1 data (Diabetes, Hypertension). 
+                    Level 2 and 3 data requires a referral.
+                </div>
+            }
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <a href="#profile" class="tab-link @(activeTab == "profile" ? "active" : "")" data-tab="profile">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="#visits" class="tab-link @(activeTab == "visits" ? "active" : "")" data-tab="visits">
+                <i class="fas fa-notes-medical"></i> Visits
+            </a>
+            <a href="#prescriptions" class="tab-link @(activeTab == "prescriptions" ? "active" : "")" data-tab="prescriptions">
+                <i class="fas fa-prescription"></i> Prescriptions
+            </a>
+            <a href="#records" class="tab-link @(activeTab == "records" ? "active" : "")" data-tab="records">
+                <i class="fas fa-file-medical"></i> Medical Records
+            </a>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- PROFILE TAB -->
+            <div id="profile" class="tab-pane @(activeTab == "profile" ? "active" : "")">
+                <div class="profile-grid">
+                    <div class="profile-card">
+                        <h4>Personal Information</h4>
+                        <div class="profile-row">
+                            <span class="label">Full Name</span>
+                            <span class="value">@Model.User?.FirstName @Model.User?.LastName</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">IC Number</span>
+                            <span class="value">@Model.User?.ICNumber</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Date of Birth</span>
+                            <span class="value">@Model.User?.DateOfBirth.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Gender</span>
+                            <span class="value">@Model.User?.Gender</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Email</span>
+                            <span class="value">@Model.User?.Email</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h4>Medical Information</h4>
+                        <div class="profile-row">
+                            <span class="label">Blood Type</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.BloodType) ? "Not recorded" : Model.Patient.BloodType)</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Allergies</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.Allergies) ? "None" : Model.Patient.Allergies)</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Chronic Conditions</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.ChronicConditions) ? "None" : Model.Patient.ChronicConditions)</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Current Medications</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.CurrentMedications) ? "None" : Model.Patient.CurrentMedications)</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h4>Emergency Contact</h4>
+                        <div class="profile-row">
+                            <span class="label">Name</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.EmergencyContactName) ? "Not recorded" : Model.Patient.EmergencyContactName)</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Phone</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.EmergencyContactPhone) ? "Not recorded" : Model.Patient.EmergencyContactPhone)</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="label">Relationship</span>
+                            <span class="value">@(string.IsNullOrEmpty(Model.Patient?.EmergencyContactRelationship) ? "Not recorded" : Model.Patient.EmergencyContactRelationship)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISITS TAB -->
+            <div id="visits" class="tab-pane @(activeTab == "visits" ? "active" : "")">
+                <h4>Visit History</h4>
+                @if (Model.Appointments.Any())
+                {
+                    <div class="visits-list">
+                        @foreach (var appt in Model.Appointments)
+                        {
+                            <div class="visit-card">
+                                <div class="visit-header">
+                                    <span class="visit-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
+                                    <span class="visit-doctor">Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</span>
+                                    <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
+                                </div>
+                                <div class="visit-body">
+                                    <div class="visit-diagnosis">
+                                        <strong>Diagnosis:</strong> @(string.IsNullOrEmpty(appt.Diagnosis) ? "Not recorded" : appt.Diagnosis)
+                                    </div>
+                                    <div class="visit-treatment">
+                                        <strong>Treatment Plan:</strong> @(string.IsNullOrEmpty(appt.TreatmentPlan) ? "Not recorded" : appt.TreatmentPlan)
+                                    </div>
+                                    <div class="visit-notes">
+                                        <strong>Notes:</strong> @(string.IsNullOrEmpty(appt.ClinicalNotes) ? "No clinical notes" : appt.ClinicalNotes)
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(appt.Symptoms))
+                                    {
+                                        <div class="visit-symptoms">
+                                            <strong>Symptoms:</strong> @appt.Symptoms
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-state">No visit history found.</p>
+                }
+            </div>
+
+            <!-- PRESCRIPTIONS TAB -->
+            <div id="prescriptions" class="tab-pane @(activeTab == "prescriptions" ? "active" : "")">
+                <h4>Prescription History</h4>
+                @if (Model.Prescriptions.Any())
+                {
+                    <div class="prescriptions-list">
+                        @foreach (var rx in Model.Prescriptions)
+                        {
+                            <div class="prescription-card">
+                                <div class="rx-header">
+                                    <span class="rx-medication">@rx.MedicationName</span>
+                                    <span class="rx-dosage">@rx.Dosage</span>
+                                    <span class="status-badge @rx.Status.ToLower()">@rx.Status</span>
+                                </div>
+                                <div class="rx-body">
+                                    <div class="rx-detail">
+                                        <span class="label">Frequency:</span>
+                                        <span class="value">@rx.Frequency</span>
+                                    </div>
+                                    <div class="rx-detail">
+                                        <span class="label">Duration:</span>
+                                        <span class="value">@rx.Duration</span>
+                                    </div>
+                                    <div class="rx-detail">
+                                        <span class="label">Quantity:</span>
+                                        <span class="value">@rx.Quantity</span>
+                                    </div>
+                                    <div class="rx-detail">
+                                        <span class="label">Prescribed:</span>
+                                        <span class="value">@rx.PrescribedDate.ToString("dd MMM yyyy")</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(rx.Instructions))
+                                    {
+                                        <div class="rx-detail">
+                                            <span class="label">Instructions:</span>
+                                            <span class="value">@rx.Instructions</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-state">No prescriptions found.</p>
+                }
+            </div>
+
+            <!-- MEDICAL RECORDS TAB -->
+            <div id="records" class="tab-pane @(activeTab == "records" ? "active" : "")">
+                <h4>Medical Records</h4>
+                @if (Model.MedicalRecords.Any())
+                {
+                    <div class="records-list">
+                        @foreach (var record in Model.MedicalRecords)
+                        {
+                            <div class="record-card">
+                                <div class="record-header">
+                                    <span class="record-type">@record.RecordType</span>
+                                    <span class="record-date">@record.RecordDate.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <div class="record-body">
+                                    <div class="record-title">
+                                        <strong>@record.Title</strong>
+                                    </div>
+                                    <div class="record-description">
+                                        @record.Description
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(record.FileUrl))
+                                    {
+                                        <div class="record-file">
+                                            <a href="@record.FileUrl" target="_blank" class="btn btn-sm btn-outline">
+                                                <i class="fas fa-file-download"></i> View Document
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-state">No medical records found.</p>
+                }
+            </div>
+        </div>
+
+        
+        <div class="emr-actions">
+            <!-- Back Button -->
+            <a href="@Url.Action("Appointments")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Appointments
+            </a>
+            <!-- Prescribe Button -->
+            <a href="@Url.Action("Prescribe", new { appointmentId = Model.Appointments.FirstOrDefault()?.Id })" class="btn btn-primary">
+                <i class="fas fa-prescription"></i> Prescribe Medication
+            </a>
+            <!-- Refer Patient Button -->
+            @if (User.IsInRole("Doctor"))
+            {
+                <a href="@Url.Action("CreateReferral", "Doctor", new { patientId = Model.Patient.Id })" class="btn btn-success">
+                    <i class="fas fa-share-alt"></i> Refer Patient
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all tabs
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    const target = this.getAttribute('data-tab');
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .emr-container { padding: 30px 0; }
+
+        /* Patient Header */
+        .patient-header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .patient-avatar i {
+            font-size: 4rem;
+            color: #0056a7;
+        }
+
+        .patient-info h2 {
+            color: #003366;
+            margin-bottom: 5px;
+        }
+
+        .patient-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .patient-meta span i {
+            margin-right: 5px;
+            color: #0056a7;
+        }
+
+        .patient-stats {
+            display: flex;
+            gap: 30px;
+            margin-left: auto;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 5px;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab-link {
+            padding: 10px 20px;
+            color: #666;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab-link:hover {
+            background: #f4f6f9;
+            color: #003366;
+        }
+
+        .tab-link.active {
+            background: #0056a7;
+            color: white;
+        }
+
+        /* Tab Content */
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .tab-pane h4 {
+            color: #003366;
+            margin-bottom: 20px;
+        }
+
+        /* Profile Card */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .profile-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .profile-card h4 {
+            color: #003366;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f4f6f9;
+        }
+
+        .profile-row .label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .profile-row .value {
+            color: #003366;
+            font-weight: 500;
+        }
+
+        /* Visit Cards */
+        .visits-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .visit-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .visit-header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .visit-date {
+            font-weight: 600;
+            color: #003366;
+        }
+
+        .visit-doctor {
+            color: #0056a7;
+        }
+
+        .visit-body {
+            display: grid;
+            gap: 6px;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .visit-body strong {
+            color: #003366;
+        }
+
+        /* Prescription Cards */
+        .prescriptions-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .prescription-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .rx-header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .rx-medication {
+            font-weight: 600;
+            color: #003366;
+            font-size: 1.05rem;
+        }
+
+        .rx-dosage {
+            color: #333;
+        }
+
+        .rx-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .rx-detail .label {
+            color: #666;
+        }
+
+        /* Medical Records */
+        .records-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .record-card {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .record-header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .record-type {
+            font-weight: 600;
+            color: #0056a7;
+        }
+
+        .record-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .record-body {
+            display: grid;
+            gap: 6px;
+            color: #333;
+        }
+
+        .record-body strong {
+            color: #003366;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #ffc107; color: #856404; }
+        .status-badge.confirmed { background: #28a745; color: white; }
+        .status-badge.inprogress { background: #17a2b8; color: white; }
+        .status-badge.completed { background: #6c757d; color: white; }
+        .status-badge.cancelled { background: #dc3545; color: white; }
+        .status-badge.active { background: #28a745; color: white; }
+        .status-badge.completed { background: #6c757d; color: white; }
+        .status-badge.expired { background: #dc3545; color: white; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+        }
+
+        /* Buttons */
+        .emr-actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+        .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .patient-stats {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-around;
+            }
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab-navigation {
+                justify-content: center;
+            }
+        }
+    </style>
+}

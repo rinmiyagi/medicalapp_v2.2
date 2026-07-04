@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using medicalapp.Data;
 
@@ -11,9 +12,11 @@ using medicalapp.Data;
 namespace MedicalApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260703170119_AddInvoiceSystem")]
+    partial class AddInvoiceSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -329,12 +332,6 @@ namespace MedicalApp.Migrations
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsReferralOnly")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSensitive")
-                        .HasColumnType("bit");
-
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
@@ -562,12 +559,6 @@ namespace MedicalApp.Migrations
                     b.Property<bool>("IsConfidential")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsReferralOnly")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSensitive")
-                        .HasColumnType("bit");
-
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
@@ -786,51 +777,6 @@ namespace MedicalApp.Migrations
                     b.ToTable("Prescriptions");
                 });
 
-            modelBuilder.Entity("medicalapp.Models.Referral", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FromDoctorId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResponseAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ToDoctorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromDoctorId");
-
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("ToDoctorId");
-
-                    b.ToTable("Referrals");
-                });
-
             modelBuilder.Entity("medicalapp.Models.Schedule", b =>
                 {
                     b.Property<int>("Id")
@@ -984,7 +930,7 @@ namespace MedicalApp.Migrations
                         .HasForeignKey("DoctorId");
 
                     b.HasOne("medicalapp.Models.Patient", "Patient")
-                        .WithMany("MedicalRecords")
+                        .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1003,7 +949,7 @@ namespace MedicalApp.Migrations
                         .HasForeignKey("DoctorId");
 
                     b.HasOne("medicalapp.Models.Patient", "Patient")
-                        .WithMany("MedicalReportRequests")
+                        .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1051,33 +997,6 @@ namespace MedicalApp.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("medicalapp.Models.Referral", b =>
-                {
-                    b.HasOne("medicalapp.Models.Doctor", "FromDoctor")
-                        .WithMany()
-                        .HasForeignKey("FromDoctorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("medicalapp.Models.Patient", "Patient")
-                        .WithMany("Referrals")
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("medicalapp.Models.Doctor", "ToDoctor")
-                        .WithMany()
-                        .HasForeignKey("ToDoctorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FromDoctor");
-
-                    b.Navigation("Patient");
-
-                    b.Navigation("ToDoctor");
-                });
-
             modelBuilder.Entity("medicalapp.Models.Schedule", b =>
                 {
                     b.HasOne("medicalapp.Models.Doctor", "Doctor")
@@ -1111,13 +1030,7 @@ namespace MedicalApp.Migrations
 
                     b.Navigation("Invoices");
 
-                    b.Navigation("MedicalRecords");
-
-                    b.Navigation("MedicalReportRequests");
-
                     b.Navigation("Prescriptions");
-
-                    b.Navigation("Referrals");
                 });
 #pragma warning restore 612, 618
         }

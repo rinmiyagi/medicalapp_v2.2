@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using medicalapp.Data;
 using medicalapp.Models;
 using medicalapp.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace medicalapp.Controllers
 {
@@ -32,6 +33,11 @@ namespace medicalapp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+
+            var pendingReferrals = await _context.Referrals
+                .CountAsync(r => r.ToDoctorId == doctor.Id && r.Status == "Pending");
+
+            ViewBag.PendingReferrals = pendingReferrals;
 
             var today = DateTime.Today;
             var viewModel = new DoctorDashboardViewModel
@@ -188,24 +194,27 @@ namespace medicalapp.Controllers
             return RedirectToAction("AppointmentDetails", new { id = id });
         }
 
-        // GET: Patient History
+        // GET: Patient History (Full EMR View with Security Levels)
         public async Task<IActionResult> PatientHistory(int patientId)
         {
             var user = await _userManager.GetUserAsync(User);
-            var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.UserId == user.Id);
-
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+            
             if (doctor == null)
             {
                 return RedirectToAction("Index", "Home");
             }
 
+            // Load the patient with all related data
             var patient = await _context.Patients
                 .Include(p => p.User)
                 .Include(p => p.Appointments)
-                .ThenInclude(a => a.Doctor)
-                .ThenInclude(d => d.User)
+                    .ThenInclude(a => a.Doctor)
+                    .ThenInclude(d => d.User)
                 .Include(p => p.Prescriptions)
+                    .ThenInclude(r => r.Doctor)
+                    .ThenInclude(d => d.User)
+                .Include(p => p.MedicalRecords)
                 .FirstOrDefaultAsync(p => p.Id == patientId);
 
             if (patient == null)
@@ -213,9 +222,99 @@ namespace medicalapp.Controllers
                 return NotFound();
             }
 
-            return View(patient);
-        }
+            // =============================================
+            // LEVEL 1: Always Visible (Diabetes, Hypertension)
+            // =============================================
+            // This data is already in the Patient model.
+            // We don't need to hide it.
 
+            // =============================================
+            // LEVEL 2: Check for Active Referral
+            // =============================================
+            bool hasActiveReferral = await _context.Referrals
+                .AnyAsync(r => r.PatientId == patientId 
+                            && r.ToDoctorId == doctor.Id 
+                            && r.Status == "Accepted");
+
+            // =============================================
+            // LEVEL 3: Check if this doctor wrote the note
+            // =============================================
+            // For Level 3 data, we need to check if the doctor is the one who wrote it
+
+            // Filter Appointments based on access levels
+            var filteredAppointments = new List<Appointment>();
+
+            foreach (var appt in patient.Appointments.OrderByDescending(a => a.AppointmentDate))
+            {
+                bool isWritingDoctor = appt.DoctorId == doctor.Id;
+
+                // Level 3 (HIV, Psych): Only the writing doctor can see it
+                if (appt.IsSensitive)
+                {
+                    if (isWritingDoctor)
+                    {
+                        filteredAppointments.Add(appt); // Show to writing doctor
+                    }
+                    // If not the writing doctor, DO NOT add it (it's hidden)
+                }
+                // Level 2 (ADHD, X-Rays): Requires active referral
+                else if (appt.IsReferralOnly)
+                {
+                    if (hasActiveReferral || isWritingDoctor)
+                    {
+                        filteredAppointments.Add(appt); // Show if referred or writing doctor
+                    }
+                }
+                // Level 1 (Diabetes, Hypertension): Always visible
+                else
+                {
+                    filteredAppointments.Add(appt);
+                }
+            }
+
+            // Filter Medical Records (X-Rays, Lab Results) - Level 2
+            var filteredRecords = new List<MedicalRecord>();
+
+            foreach (var record in patient.MedicalRecords.OrderByDescending(m => m.RecordDate))
+            {
+                if (record.IsReferralOnly)
+                {
+                    if (hasActiveReferral)
+                    {
+                        filteredRecords.Add(record);
+                    }
+                }
+                else
+                {
+                    filteredRecords.Add(record); // Always visible
+                }
+            }
+
+            // Build the ViewModel
+            var viewModel = new PatientMedicalRecordViewModel
+            {
+                Patient = patient,
+                User = patient.User,
+                Appointments = filteredAppointments,
+                Prescriptions = patient.Prescriptions.OrderByDescending(r => r.PrescribedDate).ToList(),
+                MedicalRecords = filteredRecords,
+                TotalVisits = patient.Appointments.Count(a => a.Status == "Completed"),
+                ActivePrescriptions = patient.Prescriptions.Count(r => r.Status == "Active"),
+                LastVisitDate = patient.Appointments
+                    .Where(a => a.Status == "Completed")
+                    .OrderByDescending(a => a.AppointmentDate)
+                    .Select(a => a.AppointmentDate.ToString("dd MMM yyyy"))
+                    .FirstOrDefault() ?? "No visits yet",
+                // Add these for the view
+                HasActiveReferral = hasActiveReferral,
+                IsWritingDoctor = patient.Appointments.Any(a => a.DoctorId == doctor.Id)
+            };
+
+            // Pass the access level to the view
+            ViewBag.HasActiveReferral = hasActiveReferral;
+
+            return View(viewModel);
+        }
         // GET: Complete Appointment (mark as completed)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -461,65 +560,265 @@ namespace medicalapp.Controllers
     }
 
     // GET: Reject Report Request (shows the form)
-            public async Task<IActionResult> RejectReportRequest(int id)
+    public async Task<IActionResult> RejectReportRequest(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (doctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        
+        var request = await _context.MedicalReportRequests
+            .Include(r => r.Patient)
+                .ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(r => r.Id == id);
+        
+        if (request == null)
+        {
+            return NotFound();
+        }
+        
+        var viewModel = new RejectReportRequestViewModel
+        {
+            RequestId = request.Id,
+            PatientName = $"{request.Patient.User.FirstName} {request.Patient.User.LastName}",
+            Reason = request.Reason
+        };
+        
+        return View(viewModel);
+    }
+
+    // POST: Reject Report Request (processes the rejection)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RejectReportRequest(int id, string rejectionReason)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (doctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        
+        var request = await _context.MedicalReportRequests.FindAsync(id);
+        if (request == null)
+        {
+            return NotFound();
+        }
+        
+        request.Status = "Rejected";
+        request.ResponseDate = DateTime.Now;
+        request.ApprovedBy = user.Id;
+        request.RejectionReason = rejectionReason ?? "No reason provided.";
+        
+        await _context.SaveChangesAsync();
+        
+        TempData["Success"] = "Report request rejected successfully.";
+        return RedirectToAction("ReportRequests");
+    }
+
+
+    // =============================================
+    // REFERRAL SYSTEM
+    // =============================================
+
+    // GET: Create Referral (Show the form)
+    public async Task<IActionResult> CreateReferral(int patientId)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var fromDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (fromDoctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var patient = await _context.Patients
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == patientId);
+
+        if (patient == null)
+        {
+            return NotFound();
+        }
+
+        // Get all other doctors (excluding the current doctor)
+        var doctors = await _context.Doctors
+            .Include(d => d.User)
+            .Where(d => d.Id != fromDoctor.Id && d.IsVerified)
+            .Select(d => new SelectListItem
             {
+                Value = d.Id.ToString(),
+                Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+            })
+            .ToListAsync();
+
+        var viewModel = new CreateReferralViewModel
+        {
+            PatientId = patient.Id,
+            PatientName = $"{patient.User.FirstName} {patient.User.LastName}",
+            FromDoctorId = fromDoctor.Id,
+            Doctors = doctors
+        };
+
+        return View(viewModel);
+    }
+
+    // POST: Create Referral
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateReferral(CreateReferralViewModel model)
+    {
+        try
+        {
+            Console.WriteLine("🔥🔥🔥 CREATE REFERRAL POST METHOD HIT 🔥🔥🔥");
+            Console.WriteLine($"PatientId: {model.PatientId}");
+            Console.WriteLine($"FromDoctorId: {model.FromDoctorId}");
+            Console.WriteLine($"ToDoctorId: {model.ToDoctorId}");
+            Console.WriteLine($"Reason: {model.Reason}");
+
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("❌ ModelState is INVALID!");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
+                }
+                // Repopulate dropdown and return view
                 var user = await _userManager.GetUserAsync(User);
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
-                
-                if (doctor == null)
+                var fromDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+                if (fromDoctor != null)
                 {
-                    return RedirectToAction("Index", "Home");
+                    var doctors = await _context.Doctors
+                        .Include(d => d.User)
+                        .Where(d => d.Id != fromDoctor.Id && d.IsVerified)
+                        .Select(d => new SelectListItem
+                        {
+                            Value = d.Id.ToString(),
+                            Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+                        })
+                        .ToListAsync();
+                    model.Doctors = doctors;
                 }
-                
-                var request = await _context.MedicalReportRequests
-                    .Include(r => r.Patient)
-                        .ThenInclude(p => p.User)
-                    .FirstOrDefaultAsync(r => r.Id == id);
-                
-                if (request == null)
-                {
-                    return NotFound();
-                }
-                
-                var viewModel = new RejectReportRequestViewModel
-                {
-                    RequestId = request.Id,
-                    PatientName = $"{request.Patient.User.FirstName} {request.Patient.User.LastName}",
-                    Reason = request.Reason
-                };
-                
-                return View(viewModel);
+                return View(model);
             }
 
-            // POST: Reject Report Request (processes the rejection)
-            [HttpPost]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> RejectReportRequest(int id, string rejectionReason)
+            var referral = new Referral
             {
-                var user = await _userManager.GetUserAsync(User);
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
-                
-                if (doctor == null)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                
-                var request = await _context.MedicalReportRequests.FindAsync(id);
-                if (request == null)
-                {
-                    return NotFound();
-                }
-                
-                request.Status = "Rejected";
-                request.ResponseDate = DateTime.Now;
-                request.ApprovedBy = user.Id;
-                request.RejectionReason = rejectionReason ?? "No reason provided.";
-                
-                await _context.SaveChangesAsync();
-                
-                TempData["Success"] = "Report request rejected successfully.";
-                return RedirectToAction("ReportRequests");
-            }
+                PatientId = model.PatientId,
+                FromDoctorId = model.FromDoctorId,
+                ToDoctorId = model.ToDoctorId,
+                Reason = model.Reason,
+                Status = "Pending",
+                CreatedAt = DateTime.Now,
+                Notes = model.Notes
+            };
+
+            Console.WriteLine($"📋 Referral object created. About to save...");
+
+            _context.Referrals.Add(referral);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"✅ Referral saved! ID: {referral.Id}");
+
+            TempData["Success"] = "Patient referred successfully!";
+            return RedirectToAction("PatientHistory", new { patientId = model.PatientId });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌❌❌ EXCEPTION: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+            TempData["Error"] = $"Error: {ex.Message}";
+            return View(model);
+        }
+    }
+
+    
+    // GET: My Referrals (Incoming referrals for the logged-in doctor)
+    public async Task<IActionResult> MyReferrals()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (doctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var referrals = await _context.Referrals
+            .Include(r => r.Patient)
+                .ThenInclude(p => p.User)
+            .Include(r => r.FromDoctor)
+                .ThenInclude(d => d.User)
+            .Where(r => r.ToDoctorId == doctor.Id)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        return View(referrals);
+    }
+
+    // POST: Accept Referral
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AcceptReferral(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (doctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var referral = await _context.Referrals
+            .FirstOrDefaultAsync(r => r.Id == id && r.ToDoctorId == doctor.Id);
+
+        if (referral == null)
+        {
+            return NotFound();
+        }
+
+        referral.Status = "Accepted";
+        referral.ResponseAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Referral accepted! You now have access to the patient's Level 2 data.";
+        return RedirectToAction("MyReferrals");
+    }
+
+    // POST: Reject Referral
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RejectReferral(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        
+        if (doctor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        var referral = await _context.Referrals
+            .FirstOrDefaultAsync(r => r.Id == id && r.ToDoctorId == doctor.Id);
+
+        if (referral == null)
+        {
+            return NotFound();
+        }
+
+        referral.Status = "Rejected";
+        referral.ResponseAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Referral rejected.";
+        return RedirectToAction("MyReferrals");
+    }
 
 
 

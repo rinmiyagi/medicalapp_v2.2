@@ -67,7 +67,7 @@ namespace medicalapp.Data
                         Specialization = "Cardiology",
                         Department = "Cardiology Department",
                         LicenseNumber = "MED-2025-001",
-                        LicenseDocumentUrl = null, // Explicitly set to null
+                        LicenseDocumentUrl = null,
                         IsVerified = true,
                         VerifiedAt = DateTime.Now,
                         ConsultationFee = 150.00m,
@@ -79,14 +79,6 @@ namespace medicalapp.Data
                         ClinicPhone = "03-1234 5678"
                     });
                 }
-            }
-
-            // Seed a second doctor for variety
-            var doctorUser2 = await userManager.FindByEmailAsync("doctor@medicloud.com"); // Same user, different doctor profile
-            if (doctorUser2 != null)
-            {
-                // We already have one, so this is optional
-                // You can create more doctors by registering more doctor users
             }
 
             // Seed Patient profile for patient@medicloud.com
@@ -116,7 +108,6 @@ namespace medicalapp.Data
             var doctor = await context.Doctors.FirstOrDefaultAsync(d => d.UserId == doctorUser.Id);
             if (doctor != null)
             {
-                // Check if schedules already exist
                 var existingSchedules = await context.Schedules.AnyAsync(s => s.DoctorId == doctor.Id);
                 if (!existingSchedules)
                 {
@@ -199,7 +190,6 @@ namespace medicalapp.Data
 
             var patientData = new List<(string firstName, string lastName, string ic, string gender, DateTime dob, string bloodType, string allergies, string condition, string phone, string emergencyContact, string emergencyPhone, string emergencyRelation)>
             {
-                // 20+ Malaysian patients with realistic data
                 ("Ahmad", "Abdullah", "800101-10-1234", "Male", new DateTime(1980, 1, 15), "O+", "Penicillin", "Hypertension", "012-3456789", "Siti Abdullah", "019-8765432", "Spouse"),
                 ("Siti", "Aminah", "830205-08-5678", "Female", new DateTime(1983, 2, 5), "A+", "None", "None", "013-9876543", "Rahim Aminah", "016-5432109", "Spouse"),
                 ("Tan", "Wei Ming", "751112-14-9012", "Male", new DateTime(1975, 11, 12), "B+", "Peanuts", "Diabetes Type 2", "012-5678901", "Tan Mei Ling", "019-4321098", "Spouse"),
@@ -269,175 +259,232 @@ namespace medicalapp.Data
             await context.SaveChangesAsync();
 
 
-        // =============================================
-        // SEED RICH DATA FOR ADMIN ANALYTICS
-        // =============================================
+            // =============================================
+            // SEED RICH DATA FOR ADMIN ANALYTICS (ONLY ONCE)
+            // =============================================
 
-        // Get existing patients and doctors
-        var patients = await context.Patients.ToListAsync();
-        var doctors = await context.Doctors.ToListAsync();
-
-        if (patients.Any() && doctors.Any())
-        {
-            var random = new Random();
-            var statuses = new[] { "Pending", "Confirmed", "Completed", "Cancelled" };
-            var reasons = new[]
+            var existingAppointmentCount = await context.Appointments.CountAsync();
+            if (existingAppointmentCount < 10)
             {
-                "Routine Checkup", "Chest Pain", "Fever", "Headache", "High Blood Pressure",
-                "Diabetes Monitoring", "Pregnancy Check", "Follow-up", "Vaccination",
-                "Health Screening", "Heart Palpitations", "Shortness of Breath",
-                "Back Pain", "Joint Pain", "Skin Rash", "Eye Examination",
-                "Dental Check", "Ear Infection", "Stomach Pain", "Allergy Test"
-            };
-            var appointmentTypes = new[] { "In-Person", "Telehealth", "Follow-up" };
-            var doctorIds = doctors.Select(d => d.Id).ToList();
-            var patientIds = patients.Select(p => p.Id).ToList();
+                // Get existing patients and doctors
+                var existingPatients = await context.Patients.ToListAsync();
+                var existingDoctors = await context.Doctors.ToListAsync();
 
-            // Generate 50 appointments across different dates
-            var appointments = new List<Appointment>();
-            var startDate = DateTime.Now.AddDays(-60);
-            var endDate = DateTime.Now.AddDays(60);
-
-            for (int i = 0; i < 50; i++)
-            {
-                var patientId = patientIds[random.Next(patientIds.Count)];
-                var doctorId = doctorIds[random.Next(doctorIds.Count)];
-                var status = statuses[random.Next(statuses.Length)];
-                var appointmentDate = startDate.AddDays(random.Next((endDate - startDate).Days));
-                var startTime = new TimeSpan(random.Next(8, 17), random.Next(0, 60), 0);
-                var endTime = startTime.Add(TimeSpan.FromMinutes(30));
-
-                var selectedDoctor = doctors.First(d => d.Id == doctorId);
-                var fee = selectedDoctor.ConsultationFee;
-
-                appointments.Add(new Appointment
+                if (existingPatients.Any() && existingDoctors.Any())
                 {
-                    PatientId = patientId,
-                    DoctorId = doctorId,
-                    AppointmentDate = appointmentDate,
-                    StartTime = startTime,
-                    EndTime = endTime,
-                    Status = status,
-                    Type = appointmentTypes[random.Next(appointmentTypes.Length)],
-                    ReasonForVisit = reasons[random.Next(reasons.Length)],
-                    Symptoms = "Various symptoms",
-                    ConsultationFee = fee,
-                    TaxAmount = fee * 0.06m,
-                    TotalAmount = fee * 1.06m,
-                    IsPaid = status == "Completed" || status == "Confirmed",
-                    PaymentMethod = random.Next(0, 2) == 0 ? "Online Banking" : "Credit Card",
-                    PaymentReference = $"PAY-{DateTime.Now.Year}-{random.Next(10000, 99999)}",
-                    PaymentDate = status == "Completed" || status == "Confirmed" ? appointmentDate.AddDays(random.Next(0, 3)) : null,
-                    CreatedAt = appointmentDate,
-                    CreatedBy = "system"
-                });
+                    var rng = new Random(); // ✅ RENAMED from 'random' to 'rng'
+                    var statuses = new[] { "Pending", "Confirmed", "Completed", "Cancelled" };
+                    var reasons = new[]
+                    {
+                        "Routine Checkup", "Chest Pain", "Fever", "Headache", "High Blood Pressure",
+                        "Diabetes Monitoring", "Pregnancy Check", "Follow-up", "Vaccination",
+                        "Health Screening", "Heart Palpitations", "Shortness of Breath",
+                        "Back Pain", "Joint Pain", "Skin Rash", "Eye Examination",
+                        "Dental Check", "Ear Infection", "Stomach Pain", "Allergy Test"
+                    };
+                    var appointmentTypes = new[] { "In-Person", "Telehealth", "Follow-up" };
+                    var doctorIds = existingDoctors.Select(d => d.Id).ToList();
+                    var patientIds = existingPatients.Select(p => p.Id).ToList();
+
+                    // Generate 50 appointments
+                    var appointments = new List<Appointment>();
+                    var startDate = DateTime.Now.AddDays(-60);
+                    var endDate = DateTime.Now.AddDays(60);
+
+                    for (int i = 0; i < 50; i++)
+                    {
+                        var patientId = patientIds[rng.Next(patientIds.Count)];
+                        var doctorId = doctorIds[rng.Next(doctorIds.Count)];
+                        var status = statuses[rng.Next(statuses.Length)];
+                        var appointmentDate = startDate.AddDays(rng.Next((endDate - startDate).Days));
+                        var startTime = new TimeSpan(rng.Next(8, 17), rng.Next(0, 60), 0);
+                        var endTime = startTime.Add(TimeSpan.FromMinutes(30));
+
+                        var selectedDoctor = existingDoctors.First(d => d.Id == doctorId);
+                        var fee = selectedDoctor.ConsultationFee;
+
+                        appointments.Add(new Appointment
+                        {
+                            PatientId = patientId,
+                            DoctorId = doctorId,
+                            AppointmentDate = appointmentDate,
+                            StartTime = startTime,
+                            EndTime = endTime,
+                            Status = status,
+                            Type = appointmentTypes[rng.Next(appointmentTypes.Length)],
+                            ReasonForVisit = reasons[rng.Next(reasons.Length)],
+                            Symptoms = "Various symptoms",
+                            ConsultationFee = fee,
+                            TaxAmount = fee * 0.06m,
+                            TotalAmount = fee * 1.06m,
+                            IsPaid = status == "Completed" || status == "Confirmed",
+                            PaymentMethod = rng.Next(0, 2) == 0 ? "Online Banking" : "Credit Card",
+                            PaymentReference = $"PAY-{DateTime.Now.Year}-{rng.Next(10000, 99999)}",
+                            PaymentDate = status == "Completed" || status == "Confirmed" ? appointmentDate.AddDays(rng.Next(0, 3)) : null,
+                            CreatedAt = appointmentDate,
+                            CreatedBy = "system"
+                        });
+                    }
+
+                    await context.Appointments.AddRangeAsync(appointments);
+                    await context.SaveChangesAsync();
+
+                    // =============================================
+                    // SEED PRESCRIPTIONS
+                    // =============================================
+
+                    var medications = new[]
+                    {
+                        ("Amoxicillin", "500mg", "3 times daily", "7 days"),
+                        ("Paracetamol", "500mg", "4 times daily", "5 days"),
+                        ("Amlodipine", "5mg", "Once daily", "30 days"),
+                        ("Metformin", "850mg", "Twice daily", "30 days"),
+                        ("Omeprazole", "20mg", "Once daily", "14 days"),
+                        ("Losartan", "50mg", "Once daily", "30 days"),
+                        ("Atorvastatin", "20mg", "Once daily", "30 days"),
+                        ("Salbutamol", "100mcg", "As needed", "30 days"),
+                        ("Cetirizine", "10mg", "Once daily", "14 days"),
+                        ("Ibuprofen", "400mg", "3 times daily", "7 days"),
+                        ("Diazepam", "2mg", "3 times daily", "14 days"),
+                        ("Ciprofloxacin", "500mg", "Twice daily", "7 days"),
+                        ("Cough Syrup", "10ml", "3 times daily", "5 days"),
+                        ("Vitamin C", "1000mg", "Once daily", "30 days"),
+                        ("Vitamin D", "1000IU", "Once daily", "30 days")
+                    };
+
+                    var completedAppointments = await context.Appointments
+                        .Where(a => a.Status == "Completed" && a.AppointmentDate < DateTime.Now)
+                        .Take(25)
+                        .ToListAsync();
+
+                    var prescriptions = new List<Prescription>();
+                    var prescriptionStatuses = new[] { "Active", "Completed", "Cancelled" };
+
+                    foreach (var appt in completedAppointments)
+                    {
+                        var patient = await context.Patients.FindAsync(appt.PatientId);
+                        if (patient != null)
+                        {
+                            var numPrescriptions = rng.Next(1, 3);
+                            for (int i = 0; i < numPrescriptions; i++)
+                            {
+                                var med = medications[rng.Next(medications.Length)];
+                                var status = prescriptionStatuses[rng.Next(prescriptionStatuses.Length)];
+                                
+                                prescriptions.Add(new Prescription
+                                {
+                                    PatientId = appt.PatientId,
+                                    DoctorId = appt.DoctorId,
+                                    AppointmentId = appt.Id,
+                                    MedicationName = med.Item1,
+                                    Dosage = med.Item2,
+                                    Frequency = med.Item3,
+                                    Duration = med.Item4,
+                                    Instructions = $"Take as directed. {med.Item3} for {med.Item4}.",
+                                    Quantity = rng.Next(10, 60),
+                                    IsRefillable = rng.Next(0, 2) == 0,
+                                    RefillCount = rng.Next(0, 3),
+                                    PrescribedDate = appt.AppointmentDate,
+                                    ExpiryDate = appt.AppointmentDate.AddMonths(6),
+                                    Status = status
+                                });
+                            }
+                        }
+                    }
+
+                    await context.Prescriptions.AddRangeAsync(prescriptions);
+                    await context.SaveChangesAsync();
+
+                    // =============================================
+                    // SEED MEDICAL RECORDS
+                    // =============================================
+
+                    var recordTypes = new[] { "Lab Result", "X-Ray", "Blood Test", "MRI", "ECG", "Ultrasound" };
+                    var medicalRecords = new List<MedicalRecord>();
+
+                    foreach (var appt in completedAppointments.Take(15))
+                    {
+                        var patient = await context.Patients.FindAsync(appt.PatientId);
+                        if (patient != null)
+                        {
+                            medicalRecords.Add(new MedicalRecord
+                            {
+                                PatientId = appt.PatientId,
+                                DoctorId = appt.DoctorId,
+                                AppointmentId = appt.Id,
+                                RecordType = recordTypes[rng.Next(recordTypes.Length)],
+                                Title = $"{recordTypes[rng.Next(recordTypes.Length)]} - {appt.AppointmentDate:dd MMM yyyy}",
+                                Description = $"Test results and findings from consultation.",
+                                RecordDate = appt.AppointmentDate,
+                                UploadedAt = appt.AppointmentDate,
+                                UploadedBy = "doctor@medicloud.com",
+                                Status = "Active",
+                                IsConfidential = false
+                            });
+                        }
+                    }
+
+                    await context.MedicalRecords.AddRangeAsync(medicalRecords);
+                    await context.SaveChangesAsync();
+                }
             }
 
-            await context.Appointments.AddRangeAsync(appointments);
-            await context.SaveChangesAsync();
 
             // =============================================
-            // SEED PRESCRIPTIONS
+            // SEED INVOICES FOR COMPLETED APPOINTMENTS
             // =============================================
 
-            var medications = new[]
-            {
-                ("Amoxicillin", "500mg", "3 times daily", "7 days"),
-                ("Paracetamol", "500mg", "4 times daily", "5 days"),
-                ("Amlodipine", "5mg", "Once daily", "30 days"),
-                ("Metformin", "850mg", "Twice daily", "30 days"),
-                ("Omeprazole", "20mg", "Once daily", "14 days"),
-                ("Losartan", "50mg", "Once daily", "30 days"),
-                ("Atorvastatin", "20mg", "Once daily", "30 days"),
-                ("Salbutamol", "100mcg", "As needed", "30 days"),
-                ("Cetirizine", "10mg", "Once daily", "14 days"),
-                ("Ibuprofen", "400mg", "3 times daily", "7 days"),
-                ("Diazepam", "2mg", "3 times daily", "14 days"),
-                ("Ciprofloxacin", "500mg", "Twice daily", "7 days"),
-                ("Cough Syrup", "10ml", "3 times daily", "5 days"),
-                ("Vitamin C", "1000mg", "Once daily", "30 days"),
-                ("Vitamin D", "1000IU", "Once daily", "30 days")
-            };
-
-            // Get completed appointments to link prescriptions
-            var completedAppointments = await context.Appointments
-                .Where(a => a.Status == "Completed" && a.AppointmentDate < DateTime.Now)
-                .Take(25)
+            var completedApptsList = await context.Appointments
+                .Where(a => a.Status == "Completed")
                 .ToListAsync();
 
-            var prescriptions = new List<Prescription>();
-            var prescriptionStatuses = new[] { "Active", "Completed", "Cancelled" };
-
-            foreach (var appt in completedAppointments)
+            if (completedApptsList.Any())
             {
-                var patient = await context.Patients.FindAsync(appt.PatientId);
-                if (patient != null)
+                var invoiceCounter = await context.Invoices.CountAsync();
+                var newInvoices = new List<Invoice>();
+
+                foreach (var appointment in completedApptsList)
                 {
-                    // Add 1-2 prescriptions per appointment
-                    var numPrescriptions = random.Next(1, 3);
-                    for (int i = 0; i < numPrescriptions; i++)
+                    var existingInvoice = await context.Invoices
+                        .FirstOrDefaultAsync(i => i.AppointmentId == appointment.Id);
+
+                    if (existingInvoice == null)
                     {
-                        var med = medications[random.Next(medications.Length)];
-                        var status = prescriptionStatuses[random.Next(prescriptionStatuses.Length)];
-                        
-                        prescriptions.Add(new Prescription
+                        invoiceCounter++;
+                        var invoiceNumber = $"INV-{DateTime.Now.Year}-{invoiceCounter.ToString("D4")}";
+
+                        var docInfo = await context.Doctors
+                            .Include(d => d.User)
+                            .FirstOrDefaultAsync(d => d.Id == appointment.DoctorId);
+                        var docFullName = docInfo != null ? $"Dr. {docInfo.User.FirstName} {docInfo.User.LastName}" : "Unknown Doctor";
+
+                        newInvoices.Add(new Invoice
                         {
-                            PatientId = appt.PatientId,
-                            DoctorId = appt.DoctorId,
-                            AppointmentId = appt.Id,
-                            MedicationName = med.Item1,
-                            Dosage = med.Item2,
-                            Frequency = med.Item3,
-                            Duration = med.Item4,
-                            Instructions = $"Take as directed. {med.Item3} for {med.Item4}.",
-                            Quantity = random.Next(10, 60),
-                            IsRefillable = random.Next(0, 2) == 0,
-                            RefillCount = random.Next(0, 3),
-                            PrescribedDate = appt.AppointmentDate,
-                            ExpiryDate = appt.AppointmentDate.AddMonths(6),
-                            Status = status
+                            AppointmentId = appointment.Id,
+                            PatientId = appointment.PatientId,
+                            InvoiceNumber = invoiceNumber,
+                            IssueDate = appointment.AppointmentDate,
+                            DueDate = appointment.AppointmentDate.AddDays(14),
+                            SubTotal = appointment.ConsultationFee,
+                            TaxAmount = appointment.TaxAmount,
+                            TotalAmount = appointment.TotalAmount,
+                            Status = appointment.IsPaid ? "Paid" : "Unpaid",
+                            PaymentDate = appointment.IsPaid ? appointment.AppointmentDate.AddDays(1) : null,
+                            PaymentMethod = appointment.IsPaid ? appointment.PaymentMethod : null,
+                            PaymentReference = appointment.IsPaid ? appointment.PaymentReference : null,
+                            CreatedBy = "system",
+                            Notes = $"Consultation with {docFullName}"
                         });
                     }
                 }
-            }
 
-            await context.Prescriptions.AddRangeAsync(prescriptions);
-            await context.SaveChangesAsync();
-
-            // =============================================
-            // SEED MEDICAL RECORDS (For patient history)
-            // =============================================
-
-            var recordTypes = new[] { "Lab Result", "X-Ray", "Blood Test", "MRI", "ECG", "Ultrasound" };
-            var medicalRecords = new List<MedicalRecord>();
-
-            foreach (var appt in completedAppointments.Take(15))
-            {
-                var patient = await context.Patients.FindAsync(appt.PatientId);
-                if (patient != null)
+                if (newInvoices.Any())
                 {
-                    medicalRecords.Add(new MedicalRecord
-                    {
-                        PatientId = appt.PatientId,
-                        DoctorId = appt.DoctorId,
-                        AppointmentId = appt.Id,
-                        RecordType = recordTypes[random.Next(recordTypes.Length)],
-                        Title = $"{recordTypes[random.Next(recordTypes.Length)]} - {appt.AppointmentDate:dd MMM yyyy}",
-                        Description = $"Test results and findings from consultation.",
-                        RecordDate = appt.AppointmentDate,
-                        UploadedAt = appt.AppointmentDate,
-                        UploadedBy = "doctor@medicloud.com",
-                        Status = "Active",
-                        IsConfidential = false
-                    });
+                    await context.Invoices.AddRangeAsync(newInvoices);
+                    await context.SaveChangesAsync();
+                    Console.WriteLine($"✅ {newInvoices.Count} invoices seeded successfully!");
                 }
             }
-
-            await context.MedicalRecords.AddRangeAsync(medicalRecords);
-            await context.SaveChangesAsync();
-        }
-
-
             
         }
 
@@ -475,9 +522,5 @@ namespace medicalapp.Data
                 }
             }
         }
-
-
-
-        
     }
 }

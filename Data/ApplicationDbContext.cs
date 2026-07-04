@@ -19,7 +19,9 @@ namespace medicalapp.Data
         public DbSet<Prescription> Prescriptions { get; set; }
         public DbSet<MedicalReportRequest> MedicalReportRequests { get; set; } // NEW
         public DbSet<MedicalRecord> MedicalRecords { get; set; } 
-
+        public DbSet<Invoice> Invoices { get; set; }
+                public DbSet<Referral> Referrals { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -60,6 +62,30 @@ namespace medicalapp.Data
                 .WithMany(a => a.Prescriptions)
                 .HasForeignKey(p => p.AppointmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+            // =============================================
+            // NEW: Referral cascade fixes
+            // =============================================
+            // Referral - FromDoctor
+            builder.Entity<Referral>()
+                .HasOne(r => r.FromDoctor)
+                .WithMany()
+                .HasForeignKey(r => r.FromDoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Referral - ToDoctor
+            builder.Entity<Referral>()
+                .HasOne(r => r.ToDoctor)
+                .WithMany()
+                .HasForeignKey(r => r.ToDoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Referral - Patient
+            builder.Entity<Referral>()
+                .HasOne(r => r.Patient)
+                .WithMany(p => p.Referrals)
+                .HasForeignKey(r => r.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // Seed roles
             builder.Entity<IdentityRole>().HasData(
@@ -68,6 +94,20 @@ namespace medicalapp.Data
                 new IdentityRole { Id = "3", Name = "Receptionist", NormalizedName = "RECEPTIONIST" },
                 new IdentityRole { Id = "4", Name = "Admin", NormalizedName = "ADMIN" }
             );
+
+            builder.Entity<Invoice>()
+                .HasOne(i => i.Appointment)
+                .WithOne(a => a.Invoice)
+                .HasForeignKey<Invoice>(i => i.AppointmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Invoice>()
+                .HasOne(i => i.Patient)
+                .WithMany(p => p.Invoices)
+                .HasForeignKey(i => i.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
     }
 }

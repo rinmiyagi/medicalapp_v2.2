@@ -54,6 +54,12 @@ namespace medicalapp.Models
         public DateTime? ConsultationStart { get; set; }
         public DateTime? ConsultationEnd { get; set; }
             
+        //KKM compliant (Three-Tiered Medical Data Segmentation Framework.)
+        public bool IsSensitive { get; set; } = false; // Level 3 (HIV, Psych, Most Sensitive)
+        public bool IsReferralOnly { get; set; } = false; // Level 2 (ADHD, X-Rays)
+
+
+        public Invoice? Invoice { get; set; }
     }
 
 }

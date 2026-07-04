@@ -40,6 +40,9 @@
                             <a href="@Url.Action("Appointments", "Patient")" class="btn btn-outline" style="margin-right: 8px;">
                                 <i class="fas fa-calendar-check"></i> Appointments
                             </a>
+                            <a href="@Url.Action("MyInvoices", "Invoice")" class="btn btn-outline" style="margin-right: 8px;">
+                                <i class="fas fa-file-invoice"></i> My Invoices
+                            </a>
                         }
                         @if (User.IsInRole("Doctor"))
                         {
@@ -49,6 +52,18 @@
                             <a href="@Url.Action("Appointments", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
                                 <i class="fas fa-calendar-check"></i> Appointments
                             </a>
+                            <a href="@Url.Action("PatientHistory", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
+                                <i class="fas fa-notes-medical"></i> EMR
+                            </a>
+                            <a href="@Url.Action("MyReferrals", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
+                                <i class="fas fa-share-alt"></i> Referrals
+                                @if (ViewBag.PendingReferrals > 0)
+                                {
+                                    <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
+                                }
+                            </a>
+
+
                         }
                         @if (User.IsInRole("Receptionist"))
                         {
@@ -58,6 +73,11 @@
                             <a href="@Url.Action("AllAppointments", "Receptionist")" class="btn btn-outline" style="margin-right: 8px;">
                                 <i class="fas fa-calendar-alt"></i> Schedule
                             </a>
+                            <a href="@Url.Action("AllAppointments", "Receptionist")" class="btn btn-outline">
+                                <i class="fas fa-calendar-alt"></i> Schedule
+                            </a>
+
+
                         }
                         @if (User.IsInRole("Admin"))
                         {
@@ -73,6 +93,11 @@
                             <a href="@Url.Action("CreateUser", "Admin")" class="btn btn-outline" style="margin-right: 8px;">
                                 <i class="fas fa-user-plus"></i> Add User
                             </a>
+                            <a href="@Url.Action("Index", "Invoice")" class="btn btn-outline" style="margin-right: 8px;">
+                                <i class="fas fa-file-invoice"></i> Invoices
+                            </a>
+
+
                         }
 
                         <span class="navbar-text">
@@ -138,9 +163,14 @@
         </div>
     </footer>
 
-    <script src="~/js/main.js"></script>
-    @RenderSection("Styles", required: false)
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @RenderSection("Scripts", required: false)  @* ← ADD THIS *@
+        <!-- jQuery (Required for validation) -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
+        <script src="~/js/main.js"></script>
+        @RenderSection("Styles", required: false)
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        @RenderSection("Scripts", required: false)
     </body>
     </html>

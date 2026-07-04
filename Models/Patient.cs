@@ -35,7 +35,12 @@ namespace medicalapp.Models
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public List<Appointment>? Appointments { get; set; }
-        public List<Prescription>? Prescriptions { get; set; }
+
+        public List<Appointment> Appointments { get; set; } = new();
+        public List<Prescription> Prescriptions { get; set; } = new();
+        public List<MedicalRecord> MedicalRecords { get; set; } = new(); 
+        public List<MedicalReportRequest> MedicalReportRequests { get; set; } = new();
+        public List<Invoice> Invoices { get; set; } = new();
+        public List<Referral> Referrals { get; set; } = new();//level-based referral for KKM-compliant architecture
     }
 }

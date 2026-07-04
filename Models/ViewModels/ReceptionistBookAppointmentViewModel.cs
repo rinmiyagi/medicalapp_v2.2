@@ -7,11 +7,11 @@ namespace medicalapp.Models.ViewModels
     {
         [Required]
         public int PatientId { get; set; }
-        public List<SelectListItem> Patients { get; set; } = new();
+        public string PatientName { get; set; } // NEW
 
         [Required]
         public int DoctorId { get; set; }
-        public List<SelectListItem> Doctors { get; set; } = new();
+        public string DoctorName { get; set; } // NEW
 
         [Required]
         public DateTime AppointmentDate { get; set; }
@@ -20,5 +20,9 @@ namespace medicalapp.Models.ViewModels
         public string ReasonForVisit { get; set; }
 
         public string Symptoms { get; set; }
+
+        // For dropdowns (if needed elsewhere)
+        public List<SelectListItem> Patients { get; set; } = new();
+        public List<SelectListItem> Doctors { get; set; } = new();
     }
 }

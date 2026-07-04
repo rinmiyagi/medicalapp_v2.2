@@ -1,0 +1,224 @@
+@model List<medicalapp.Models.Invoice>
+
+@{
+    ViewData["Title"] = "All Invoices - MediCloud";
+    Layout = "_Layout";
+
+    // Get unique statuses for the filter
+    var statuses = Model.Select(i => i.Status).Distinct().ToList();
+    var lhdnStatuses = new List<string> { "All", "Synced", "Not Synced" };
+    var selectedStatus = ViewBag.SelectedStatus as string ?? "All";
+    var selectedLhdnStatus = ViewBag.SelectedLhdnStatus as string ?? "All";
+}
+
+<div class="invoices-container">
+    <div class="container">
+        <h2>📋 All Invoices</h2>
+        <p class="text-muted">View and manage all clinic invoices and LHDN compliance.</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" asp-action="Index">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Payment Status</label>
+                        <select name="status" class="form-control">
+                            <option value="All" selected="@(selectedStatus == "All")">All</option>
+                            @foreach (var status in statuses)
+                            {
+                                <option value="@status" selected="@(selectedStatus == status)">@status</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>LHDN Sync Status</label>
+                        <select name="lhdnStatus" class="form-control">
+                            <option value="All" selected="@(selectedLhdnStatus == "All")">All</option>
+                            <option value="Synced" selected="@(selectedLhdnStatus == "Synced")">✅ Synced</option>
+                            <option value="Not Synced" selected="@(selectedLhdnStatus == "Not Synced")">⏳ Not Synced</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group" style="align-self: flex-end;">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="@Url.Action("Index")" class="btn btn-outline">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="invoice-list">
+                <div class="invoice-header-row">
+                    <span>Invoice #</span>
+                    <span>Patient</span>
+                    <span>Doctor</span>
+                    <span>Date</span>
+                    <span>Total</span>
+                    <span>Status</span>
+                    <span>LHDN Sync</span>
+                    <span>Actions</span>
+                </div>
+                @foreach (var invoice in Model)
+                {
+                    <div class="invoice-item">
+                        <span>@invoice.InvoiceNumber</span>
+                        <span>@invoice.Patient?.User?.FirstName @invoice.Patient?.User?.LastName</span>
+                        <span>Dr. @invoice.Appointment?.Doctor?.User?.FirstName @invoice.Appointment?.Doctor?.User?.LastName</span>
+                        <span>@invoice.IssueDate.ToString("dd MMM yyyy")</span>
+                        <span>RM @invoice.TotalAmount.ToString("F2")</span>
+                        <span class="status-badge @(invoice.Status == "Paid" ? "paid" : "unpaid")">@invoice.Status</span>
+                        <span>
+                            @if (invoice.IsSyncedWithLhdn)
+                            {
+                                <span class="status-badge synced">✅ Synced</span>
+                                <span class="lhdn-ref">@invoice.LhdnReferenceId</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge not-synced">⏳ Not Synced</span>
+                            }
+                        </span>
+                        <span>
+                            <a href="@Url.Action("Details", new { id = invoice.Id })" class="btn btn-sm btn-outline">View</a>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <div class="summary-stats">
+                <p>
+                    <strong>Total Invoices:</strong> @Model.Count |
+                    <strong>Synced with LHDN:</strong> @Model.Count(i => i.IsSyncedWithLhdn) |
+                    <strong>Pending Sync:</strong> @Model.Count(i => i.Status == "Paid" && !i.IsSyncedWithLhdn)
+                </p>
+            </div>
+        }
+        else
+        {
+            <p class="empty-state">No invoices found.</p>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .invoices-container { padding: 40px 0; }
+        .invoices-container h2 { color: #003366; margin-bottom: 5px; }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0 25px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            min-width: 150px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .invoice-header-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.5fr 1fr 1fr 1fr 1.2fr 1fr;
+            padding: 12px 16px;
+            background: #f4f6f9;
+            font-weight: 600;
+            color: #003366;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .invoice-item {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.5fr 1fr 1fr 1fr 1.2fr 1fr;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-badge.paid { background: #28a745; color: white; }
+        .status-badge.unpaid { background: #ffc107; color: #856404; }
+
+        .status-badge.synced { background: #28a745; color: white; }
+        .status-badge.not-synced { background: #dc3545; color: white; }
+
+        .lhdn-ref {
+            font-size: 0.75rem;
+            color: #666;
+            margin-left: 4px;
+        }
+
+        .summary-stats {
+            margin-top: 20px;
+            padding: 12px 16px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-sm { padding: 4px 12px; font-size: 0.85rem; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; border-radius: 6px; text-decoration: none; padding: 5px 12px; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .empty-state { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; color: #666; }
+
+        .alert { padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .text-muted { color: #666; }
+    </style>
+}

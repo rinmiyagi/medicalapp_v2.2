@@ -64,12 +64,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdG9yXEFwcG9pbnRtZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Doctor/CreateReferral.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdG9yXENyZWF0ZVJlZmVycmFsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Doctor/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdG9yXERhc2hib2FyZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Doctor/GenerateReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdG9yXEdlbmVyYXRlUmVwb3J0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Doctor/MyReferrals.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRG9jdG9yXE15UmVmZXJyYWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Doctor/PatientHistory.cshtml]
@@ -112,6 +120,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTZXJ2aWNlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Invoice/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Invoice/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Invoice/MyInvoices.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxNeUludm9pY2VzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Patient/Appointments.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF0aWVudFxBcHBvaW50bWVudHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -142,6 +162,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Receptionist/BookAppointment.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXB0aW9uaXN0XEJvb2tBcHBvaW50bWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Receptionist/BookReferredAppointment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVjZXB0aW9uaXN0XEJvb2tSZWZlcnJlZEFwcG9pbnRtZW50LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/DOCUMENT_OFFLINE/SEM5/CLOUD/cloud_asg/MedicalApp/Views/Receptionist/CancelAppointment.cshtml]

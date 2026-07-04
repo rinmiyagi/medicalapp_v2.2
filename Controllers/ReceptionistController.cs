@@ -398,6 +398,85 @@ namespace medicalapp.Controllers
             return RedirectToAction("AllAppointments");
         }
 
+        // GET: Book Appointment for Referred Patient
+        public async Task<IActionResult> BookReferredAppointment(int patientId, int doctorId)
+        {
+            var patient = await _context.Patients
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == patientId);
+
+            var doctor = await _context.Doctors
+                .Include(d => d.User)
+                .FirstOrDefaultAsync(d => d.Id == doctorId);
+
+            if (patient == null || doctor == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new ReceptionistBookAppointmentViewModel
+            {
+                PatientId = patientId,
+                DoctorId = doctorId,
+                PatientName = $"{patient.User.FirstName} {patient.User.LastName}",
+                DoctorName = $"Dr. {doctor.User.FirstName} {doctor.User.LastName}",
+                AppointmentDate = DateTime.Now.AddDays(1), // Default to tomorrow
+                ReasonForVisit = "Referred by another doctor"
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Book Appointment for Referred Patient
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BookReferredAppointment(ReceptionistBookAppointmentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            var doctor = await _context.Doctors.FindAsync(model.DoctorId);
+            if (doctor == null)
+            {
+                ModelState.AddModelError("", "Selected doctor not found.");
+                return View(model);
+            }
+
+            var startTime = model.AppointmentDate.TimeOfDay;
+            var endTime = startTime.Add(TimeSpan.FromMinutes(30));
+
+            var appointment = new Appointment
+            {
+                PatientId = model.PatientId,
+                DoctorId = model.DoctorId,
+                AppointmentDate = model.AppointmentDate,
+                StartTime = startTime,
+                EndTime = endTime,
+                Status = "Pending",
+                Type = "In-Person",
+                ReasonForVisit = model.ReasonForVisit ?? "Referred by another doctor",
+                Symptoms = string.Empty,
+                DoctorNotes = string.Empty,
+                ConsultationFee = doctor.ConsultationFee,
+                TaxAmount = doctor.ConsultationFee * 0.06m,
+                TotalAmount = doctor.ConsultationFee * 1.06m,
+                IsPaid = false,
+                CreatedAt = DateTime.Now,
+                CreatedBy = user?.Id ?? "system",
+                UpdatedBy = string.Empty
+            };
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Appointment booked successfully with Dr. {doctor.User.FirstName} {doctor.User.LastName}!";
+            return RedirectToAction("AllAppointments");
+        }
+
+
 
 
     }

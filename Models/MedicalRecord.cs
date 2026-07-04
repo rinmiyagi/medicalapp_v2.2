@@ -21,7 +21,7 @@ namespace medicalapp.Models
         public Appointment Appointment { get; set; }
 
         [Required]
-        public string RecordType { get; set; } = string.Empty;
+        public string RecordType { get; set; } = string.Empty; // Lab Result, X-Ray, etc.
 
         [Required]
         public string Title { get; set; } = string.Empty;
@@ -39,5 +39,10 @@ namespace medicalapp.Models
 
         public string Status { get; set; } = "Active";
         public bool IsConfidential { get; set; } = false;
+        //three-tier privacy, KKM-based
+        public bool IsReferralOnly { get; set; } = false; // Level 2 (X-Rays, Lab Results)
+        public bool IsSensitive { get; set; } = false; // Level 3 (HIV Test Results)
+
+
     }
 }

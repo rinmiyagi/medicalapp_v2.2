@@ -1,0 +1,128 @@
+@model medicalapp.Models.ViewModels.CreateReferralViewModel
+
+@{
+    ViewData["Title"] = "Refer Patient - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="referral-container">
+    <div class="container">
+        <h2>🔄 Refer Patient</h2>
+        <p class="text-muted">
+            Referring: <strong>@Model.PatientName</strong>
+        </p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
+        <div class="referral-card">
+            <form asp-action="CreateReferral" asp-controller="Doctor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="PatientId" />
+                <input type="hidden" asp-for="FromDoctorId" />
+
+                <div class="form-group">
+                    <label asp-for="ToDoctorId" class="control-label">Select Doctor</label>
+                    <select asp-for="ToDoctorId" asp-items="Model.Doctors" class="form-control">
+                        <option value="">-- Select a Doctor --</option>
+                    </select>
+                    <span asp-validation-for="ToDoctorId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Reason" class="control-label">Reason for Referral</label>
+                    <input asp-for="Reason" class="form-control" placeholder="e.g., Cardiology consult, Neurological assessment" />
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="control-label">Additional Notes</label>
+                    <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Additional notes for the receiving doctor..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-share-alt"></i> Send Referral
+                    </button>
+                    <a href="@Url.Action("PatientHistory", new { patientId = Model.PatientId })" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section Styles {
+    <style>
+        .referral-container { padding: 40px 0; }
+        .referral-container h2 { color: #003366; margin-bottom: 5px; }
+        .text-muted { color: #666; }
+
+        .referral-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin-top: 25px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-control:focus { outline: none; border-color: #0056a7; }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-outline { background: transparent; color: #0056a7; border: 1px solid #0056a7; }
+        .btn-outline:hover { background: #0056a7; color: white; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .text-danger { color: #dc3545; font-size: 0.9rem; }
+        .text-muted { color: #666; }
+    </style>
+}
