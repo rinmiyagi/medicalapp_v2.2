@@ -24,8 +24,10 @@
         <div class="referral-card">
             <form asp-action="CreateReferral" asp-controller="Doctor" method="post">
                 @Html.AntiForgeryToken()
+                <div asp-validation-summary="All" class="text-danger mb-3 fw-bold" style="font-size: 0.9rem;"></div>
                 <input type="hidden" asp-for="PatientId" />
                 <input type="hidden" asp-for="FromDoctorId" />
+                <input type="hidden" asp-for="PatientName" />
 
                 <div class="form-group">
                     <label asp-for="ToDoctorId" class="control-label">Select Doctor</label>
