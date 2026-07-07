@@ -69,11 +69,13 @@ namespace medicalapp.Controllers
         }
 
         // GET: Book Appointment
-        public async Task<IActionResult> BookAppointment(int? doctorId)
+        public async Task<IActionResult> BookAppointment(int? doctorId, string? packageName, decimal? packagePrice)
         {
             var viewModel = new BookAppointmentViewModel
             {
                 DoctorId = doctorId ?? 0,
+                PackageName = packageName,
+                PackagePrice = packagePrice,
                 Doctors = await _context.Doctors
                     .Include(d => d.User)
                     .Where(d => d.IsVerified)
@@ -84,6 +86,57 @@ namespace medicalapp.Controllers
                     })
                     .ToListAsync()
             };
+
+            if (packagePrice.HasValue)
+            {
+                viewModel.ConsultationFee = packagePrice.Value;
+                viewModel.TaxAmount = packagePrice.Value * 0.06m;
+                viewModel.TotalAmount = packagePrice.Value * 1.06m;
+                viewModel.ReasonForVisit = $"Health Screening: {packageName}";
+
+                if (viewModel.DoctorId == 0)
+                {
+                    // Specialty routing logic based on package contents
+                    string targetSpecialty = "General"; // Default to General Medicine/Practitioner
+                    if (packageName != null && packageName.Contains("Heart", StringComparison.OrdinalIgnoreCase))
+                    {
+                        targetSpecialty = "Cardi"; // Cardiologist/Cardiology
+                    }
+
+                    var suitableDoctor = await _context.Doctors
+                        .Include(d => d.User)
+                        .FirstOrDefaultAsync(d => d.IsVerified && 
+                                                  (d.Specialization.Contains(targetSpecialty) || 
+                                                   d.Department.Contains(targetSpecialty)));
+
+                    if (suitableDoctor == null)
+                    {
+                        suitableDoctor = await _context.Doctors.FirstOrDefaultAsync(d => d.IsVerified);
+                    }
+
+                    if (suitableDoctor != null)
+                    {
+                        viewModel.DoctorId = suitableDoctor.Id;
+                    }
+                }
+            }
+
+            // Extract working days for the assigned doctor to restrict/show schedules on view
+            if (viewModel.DoctorId != 0)
+            {
+                var schedules = await _context.Schedules
+                    .Where(s => s.DoctorId == viewModel.DoctorId && s.IsAvailable)
+                    .Select(s => s.DayOfWeek)
+                    .Distinct()
+                    .ToListAsync();
+
+                foreach (var day in schedules)
+                {
+                    viewModel.AvailableDaysOfWeek.Add((int)day);
+                    viewModel.AvailableDayNames.Add(day.ToString());
+                }
+            }
+
             return View(viewModel);
         }
 
@@ -199,6 +252,9 @@ namespace medicalapp.Controllers
                     return View(model);
                 }
 
+                var fee = model.PackagePrice.HasValue ? model.PackagePrice.Value : doctor.ConsultationFee;
+                var reason = model.PackagePrice.HasValue ? $"Health Screening: {model.PackageName}" : (model.ReasonForVisit ?? string.Empty);
+
                 var appointment = new Appointment
                 {
                     PatientId = patient.Id,
@@ -206,14 +262,14 @@ namespace medicalapp.Controllers
                     AppointmentDate = model.AppointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
-                    Status = "Pending",
+                    Status = model.PackagePrice.HasValue ? "Confirmed" : "Pending",
                     Type = "In-Person",
-                    ReasonForVisit = model.ReasonForVisit ?? string.Empty,
+                    ReasonForVisit = reason,
                     Symptoms = model.Symptoms ?? string.Empty,
                     DoctorNotes = string.Empty,
-                    ConsultationFee = doctor.ConsultationFee,
-                    TaxAmount = doctor.ConsultationFee * 0.06m,
-                    TotalAmount = doctor.ConsultationFee * 1.06m,
+                    ConsultationFee = fee,
+                    TaxAmount = fee * 0.06m,
+                    TotalAmount = fee * 1.06m,
                     IsPaid = false,
                     PaymentMethod = string.Empty,
                     PaymentReference = string.Empty,
@@ -227,7 +283,14 @@ namespace medicalapp.Controllers
                 await _context.SaveChangesAsync();
                 Console.WriteLine("Appointment saved successfully!");
 
-                TempData["Success"] = "Appointment booked successfully! Please wait for doctor confirmation.";
+                if (model.PackagePrice.HasValue)
+                {
+                    TempData["Success"] = "Health screening package booked successfully! Your appointment is confirmed.";
+                }
+                else
+                {
+                    TempData["Success"] = "Appointment booked successfully! Please wait for doctor confirmation.";
+                }
                 return RedirectToAction("Dashboard");
             }
             catch (Exception ex)

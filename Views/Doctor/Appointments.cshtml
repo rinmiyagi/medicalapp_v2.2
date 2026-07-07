@@ -34,6 +34,10 @@
                 {
                     <div class="appointment-card">
                         <div class="appointment-info">
+                            @if (appt.ReasonForVisit != null && appt.ReasonForVisit.StartsWith("Health Screening:"))
+                            {
+                                <span class="badge-screening"><i class="fas fa-heartbeat"></i> Screening</span>
+                            }
                             <span class="appt-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
                             <span class="appt-time">@appt.StartTime.ToString(@"hh\:mm")</span>
                             <span class="appt-patient">@appt.Patient?.User?.FirstName @appt.Patient?.User?.LastName</span>
@@ -153,6 +157,20 @@
             margin-bottom: 20px;
         }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        .badge-screening {
+            background: #eef5fc;
+            color: #0056a7;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-transform: uppercase;
+            border: 1px solid #d0e3f5;
+        }
 
         @@media (max-width: 768px) {
             .appointment-info {

@@ -33,18 +33,45 @@
                 </div>
             </div>
 
+            @if (Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:"))
+            {
+                <div class="package-banner-card mb-4">
+                    <div class="package-banner-title">
+                        <i class="fas fa-heartbeat text-danger animate-pulse"></i>
+                        <span>@Model.ReasonForVisit</span>
+                    </div>
+                    <span class="package-badge-lbl">Health Screening Package</span>
+                </div>
+            }
+
             <!-- Doctor Information Info Card -->
             <div class="info-section">
-                <h3>👨‍⚕️ Consultant Doctor</h3>
-                <div class="doctor-profile-card">
-                    <div class="doctor-avatar-circle">
-                        <i class="fas fa-user-md"></i>
+                @if (Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:"))
+                {
+                    <h3>👨‍⚕️ Clinical Examiner (Assigned Doctor)</h3>
+                    <div class="doctor-profile-card">
+                        <div class="doctor-avatar-circle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="doctor-detail-text">
+                            <h4>Dr. @Model.Doctor?.User?.FirstName @Model.Doctor?.User?.LastName</h4>
+                            <p class="specialization" style="color: #666; font-size: 0.85rem;"><i class="fas fa-info-circle"></i> Assigned clinical doctor for checkup assessment and medical screening report.</p>
+                        </div>
                     </div>
-                    <div class="doctor-detail-text">
-                        <h4>Dr. @Model.Doctor?.User?.FirstName @Model.Doctor?.User?.LastName</h4>
-                        <p class="specialization">@Model.Doctor?.Specialization</p>
+                }
+                else
+                {
+                    <h3>👨‍⚕️ Consultant Doctor</h3>
+                    <div class="doctor-profile-card">
+                        <div class="doctor-avatar-circle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="doctor-detail-text">
+                            <h4>Dr. @Model.Doctor?.User?.FirstName @Model.Doctor?.User?.LastName</h4>
+                            <p class="specialization">@Model.Doctor?.Specialization</p>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
 
             <!-- Schedule Info Card -->
@@ -82,7 +109,7 @@
                 <h3>💳 Billing & Payment</h3>
                 <div class="grid-details">
                     <div class="detail-item">
-                        <span class="item-label">Consultation Fee</span>
+                        <span class="item-label">@(Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:") ? "Package Fee" : "Consultation Fee")</span>
                         <span class="item-value price">RM @Model.TotalAmount</span>
                     </div>
                     <div class="detail-item">
@@ -254,5 +281,43 @@
         }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Health Screening Banner details */
+        .package-banner-card {
+            background: #f0f7ff;
+            border: 1px solid #cce3ff;
+            padding: 16px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .package-banner-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #003366;
+        }
+        .package-badge-lbl {
+            background: #0056a7;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
     </style>
 }

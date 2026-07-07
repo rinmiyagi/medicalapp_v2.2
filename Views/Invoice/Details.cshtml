@@ -49,7 +49,16 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Consultation - Dr. @Model.Appointment?.Doctor?.User?.FirstName @Model.Appointment?.Doctor?.User?.LastName</td>
+                        <td>
+                            @if (Model.Appointment?.ReasonForVisit != null && Model.Appointment.ReasonForVisit.StartsWith("Health Screening:"))
+                            {
+                                @Model.Appointment.ReasonForVisit
+                            }
+                            else
+                            {
+                                <text>Consultation - Dr. @Model.Appointment?.Doctor?.User?.FirstName @Model.Appointment?.Doctor?.User?.LastName</text>
+                            }
+                        </td>
                         <td>RM @Model.SubTotal.ToString("F2")</td>
                     </tr>
                     <tr>

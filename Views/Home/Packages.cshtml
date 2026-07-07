@@ -26,7 +26,7 @@
                         <li><i class="fas fa-check-circle"></i> ECG</li>
                         <li><i class="fas fa-check-circle"></i> Specialist Consultation</li>
                     </ul>
-                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-primary btn-block">Book Now</a>
+                    <a href="@Url.Action("BookAppointment", "Patient", new { packageName = "Executive Wellness", packagePrice = 499.00 })" class="btn btn-primary btn-block">Book Now</a>
                 </div>
             </div>
             <!-- Basic Health Check -->
@@ -40,7 +40,7 @@
                         <li><i class="fas fa-check-circle"></i> Cholesterol Test</li>
                         <li><i class="fas fa-check-circle"></i> BMI Assessment</li>
                     </ul>
-                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-outline btn-block">Book Now</a>
+                    <a href="@Url.Action("BookAppointment", "Patient", new { packageName = "Basic Health Check", packagePrice = 199.00 })" class="btn btn-outline btn-block">Book Now</a>
                 </div>
             </div>
             <!-- Heart Screening -->
@@ -54,7 +54,7 @@
                         <li><i class="fas fa-check-circle"></i> Stress Test</li>
                         <li><i class="fas fa-check-circle"></i> Lipid Profile</li>
                     </ul>
-                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-outline btn-block">Book Now</a>
+                    <a href="@Url.Action("BookAppointment", "Patient", new { packageName = "Heart Screening", packagePrice = 349.00 })" class="btn btn-outline btn-block">Book Now</a>
                 </div>
             </div>
         </div>
