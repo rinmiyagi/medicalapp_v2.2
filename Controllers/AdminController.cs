@@ -294,6 +294,23 @@ namespace medicalapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(AdminCreateUserViewModel model)
         {
+            // Conditional validation for Doctor role
+            if (model.Role == "Doctor")
+            {
+                if (string.IsNullOrWhiteSpace(model.Specialization))
+                {
+                    ModelState.AddModelError("Specialization", "The Specialization field is required for Doctor role.");
+                }
+                if (string.IsNullOrWhiteSpace(model.Department))
+                {
+                    ModelState.AddModelError("Department", "The Department field is required for Doctor role.");
+                }
+                if (string.IsNullOrWhiteSpace(model.LicenseNumber))
+                {
+                    ModelState.AddModelError("LicenseNumber", "The License Number field is required for Doctor role.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -346,8 +363,8 @@ namespace medicalapp.Controllers
                     IsVerified = true, // Admin creates verified doctors
                     VerifiedAt = DateTime.Now,
                     VerifiedBy = User.Identity.Name,
-                    ConsultationFee = model.ConsultationFee > 0 ? model.ConsultationFee : 100.00m,
-                    YearsOfExperience = model.YearsOfExperience,
+                    ConsultationFee = model.ConsultationFee ?? 100.00m,
+                    YearsOfExperience = model.YearsOfExperience ?? 0,
                     Bio = model.Bio ?? string.Empty,
                     ClinicName = "MediCloud Hospital",
                     ClinicAddress = "123 Jalan Medik, 47100 Puchong",

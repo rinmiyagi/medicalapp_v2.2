@@ -191,5 +191,22 @@
                 </div>
             </div>
         </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    showToast("@TempData["Success"]", "success");
+                });
+            </script>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    showToast("@TempData["Error"]", "danger");
+                });
+            </script>
+        }
     </body>
 </html>

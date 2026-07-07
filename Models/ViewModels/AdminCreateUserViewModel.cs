@@ -47,21 +47,21 @@ namespace medicalapp.Models.ViewModels
 
         // Doctor-specific fields
         [Display(Name = "Specialization")]
-        public string Specialization { get; set; }
+        public string? Specialization { get; set; }
 
         [Display(Name = "Department")]
-        public string Department { get; set; }
+        public string? Department { get; set; }
 
         [Display(Name = "License Number")]
-        public string LicenseNumber { get; set; }
+        public string? LicenseNumber { get; set; }
 
         [Display(Name = "Years of Experience")]
-        public int YearsOfExperience { get; set; }
+        public int? YearsOfExperience { get; set; }
 
         [Display(Name = "Consultation Fee (RM)")]
-        public decimal ConsultationFee { get; set; }
+        public decimal? ConsultationFee { get; set; }
 
         [Display(Name = "Bio")]
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
     }
 }
