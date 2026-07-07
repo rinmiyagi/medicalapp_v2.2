@@ -41,6 +41,12 @@
                         </li>
                         <li><a href="@Url.Action("Schedules", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "Schedules" ? "active" : "")"><i class="fas fa-calendar-alt"></i> My Schedule</a></li>
                     }
+                    else if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                    {
+                        <li><a href="@Url.Action("Users", "Admin")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && (ViewContext.RouteData.Values["action"]?.ToString() == "Users" || ViewContext.RouteData.Values["action"]?.ToString() == "UserDetails") ? "active" : "")"><i class="fas fa-users-cog"></i> Users</a></li>
+                        <li><a href="@Url.Action("PendingDoctors", "Admin")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "PendingDoctors" ? "active" : "")"><i class="fas fa-user-check"></i> Verify Doctors</a></li>
+                        <li><a href="@Url.Action("Index", "Invoice")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"><i class="fas fa-file-invoice"></i> Invoices</a></li>
+                    }
                     else
                     {
                         <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
@@ -75,7 +81,7 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-primary">
-                                    <i class="fas fa-crown"></i> Admin
+                                    <i class="fas fa-crown"></i> Dashboard
                                 </a>
                             }
 
@@ -95,21 +101,7 @@
                                         </a>
                                     }
 
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <a href="@Url.Action("Users", "Admin")">
-                                            <i class="fas fa-users-cog"></i> Users
-                                        </a>
-                                        <a href="@Url.Action("PendingDoctors", "Admin")">
-                                            <i class="fas fa-user-check"></i> Verify Doctors
-                                        </a>
-                                        <a href="@Url.Action("CreateUser", "Admin")">
-                                            <i class="fas fa-user-plus"></i> Add User
-                                        </a>
-                                        <a href="@Url.Action("Index", "Invoice")">
-                                            <i class="fas fa-file-invoice"></i> Invoices
-                                        </a>
-                                    }
+
                                     <div class="dropdown-divider"></div>
                                     <form asp-action="Logout" asp-controller="Account" method="post" style="display:block; margin:0;">
                                         <button type="submit" class="dropdown-item-logout">
