@@ -188,5 +188,95 @@ namespace medicalapp.Controllers
 
             return View();
         }
+
+        // GET: Account/ForgotPassword
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: Account/ForgotPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    // Don't reveal that the user does not exist
+                    return RedirectToAction("ForgotPasswordConfirmation", new { email = model.Email, token = "" });
+                }
+
+                // Generate password reset token
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                // Redirect to ForgotPasswordConfirmation with token for local development mock
+                return RedirectToAction("ForgotPasswordConfirmation", new { email = user.Email, token = token });
+            }
+
+            return View(model);
+        }
+
+        // GET: Account/ForgotPasswordConfirmation
+        [HttpGet]
+        public IActionResult ForgotPasswordConfirmation(string email, string token)
+        {
+            ViewBag.Email = email;
+            ViewBag.Token = token;
+            return View();
+        }
+
+        // GET: Account/ResetPassword
+        [HttpGet]
+        public IActionResult ResetPassword(string token = null, string email = null)
+        {
+            if (token == null || email == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordViewModel { Token = token, Email = email };
+            return View(model);
+        }
+
+        // POST: Account/ResetPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
+        // GET: Account/ResetPasswordConfirmation
+        [HttpGet]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
     }
 }
