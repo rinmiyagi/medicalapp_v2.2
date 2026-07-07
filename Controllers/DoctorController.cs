@@ -134,6 +134,14 @@ namespace medicalapp.Controllers
                 return NotFound();
             }
 
+            var activeReferral = await _context.Referrals
+                .Include(r => r.FromDoctor)
+                    .ThenInclude(d => d.User)
+                .FirstOrDefaultAsync(r => r.PatientId == appointment.PatientId && 
+                                          r.ToDoctorId == doctor.Id && 
+                                          r.Status == "Accepted");
+            ViewBag.ActiveReferral = activeReferral;
+
             return View(appointment);
         }
         // POST: Accept Appointment
@@ -912,6 +920,30 @@ namespace medicalapp.Controllers
         }
 
         return RedirectToAction("Schedules");
+    }
+
+    // GET: Doctor/MyPatients
+    public async Task<IActionResult> MyPatients()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        if (doctor == null) return RedirectToAction("Index", "Home");
+
+        var patientIds = await _context.Appointments
+            .Where(a => a.DoctorId == doctor.Id)
+            .Select(a => a.PatientId)
+            .Union(_context.Referrals
+                .Where(r => r.ToDoctorId == doctor.Id && r.Status == "Accepted")
+                .Select(r => r.PatientId))
+            .Distinct()
+            .ToListAsync();
+
+        var patients = await _context.Patients
+            .Include(p => p.User)
+            .Where(p => patientIds.Contains(p.Id))
+            .ToListAsync();
+
+        return View(patients);
     }
 }
 }
