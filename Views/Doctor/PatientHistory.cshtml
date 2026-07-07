@@ -8,6 +8,18 @@
 
 <div class="emr-container">
     <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+            </div>
+        }
         <!-- Patient Header -->
         <div class="patient-header">
             <div class="patient-avatar">
@@ -138,6 +150,63 @@
                             <span class="label">Relationship</span>
                             <span class="value">@(string.IsNullOrEmpty(Model.Patient?.EmergencyContactRelationship) ? "Not recorded" : Model.Patient.EmergencyContactRelationship)</span>
                         </div>
+                    </div>
+
+                    <!-- Referral History Card -->
+                    <div class="profile-card" style="grid-column: 1 / -1; margin-top: 10px;">
+                        <h4 style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                            <span><i class="fas fa-share-alt text-primary me-2"></i> Referral History</span>
+                            <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">
+                                @(Model.Patient?.Referrals?.Count ?? 0) record(s)
+                            </span>
+                        </h4>
+                        
+                        @if (Model.Patient?.Referrals != null && Model.Patient.Referrals.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem; width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid #dee2e6; text-align: left;">
+                                            <th style="padding: 10px; color: #666; font-weight: 600;">Date</th>
+                                            <th style="padding: 10px; color: #666; font-weight: 600;">From</th>
+                                            <th style="padding: 10px; color: #666; font-weight: 600;">To</th>
+                                            <th style="padding: 10px; color: #666; font-weight: 600;">Reason</th>
+                                            <th style="padding: 10px; color: #666; font-weight: 600; text-align: right;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var referral in Model.Patient.Referrals.OrderByDescending(r => r.CreatedAt))
+                                        {
+                                            <tr style="border-bottom: 1px solid #eef1f6;">
+                                                <td style="padding: 12px 10px;" class="text-dark fw-semibold">
+                                                    @referral.CreatedAt.ToString("dd MMM yyyy")
+                                                </td>
+                                                <td style="padding: 12px 10px;">
+                                                    <span class="fw-bold">Dr. @referral.FromDoctor?.User?.FirstName @referral.FromDoctor?.User?.LastName</span>
+                                                    <span class="text-muted d-block small" style="font-size: 0.8rem;">@referral.FromDoctor?.Specialization</span>
+                                                </td>
+                                                <td style="padding: 12px 10px;">
+                                                    <span class="fw-bold">Dr. @referral.ToDoctor?.User?.FirstName @referral.ToDoctor?.User?.LastName</span>
+                                                    <span class="text-muted d-block small" style="font-size: 0.8rem;">@referral.ToDoctor?.Specialization</span>
+                                                </td>
+                                                <td style="padding: 12px 10px; color: #555;">
+                                                    @referral.Reason
+                                                </td>
+                                                <td style="padding: 12px 10px; text-align: right;">
+                                                    <span class="status-badge @referral.Status.ToLower()">
+                                                        @referral.Status
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 py-3 text-center" style="font-size: 0.95rem;"><i class="fas fa-info-circle me-1"></i> No referrals recorded for this patient.</p>
+                        }
                     </div>
                 </div>
             </div>

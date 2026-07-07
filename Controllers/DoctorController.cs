@@ -229,6 +229,12 @@ namespace medicalapp.Controllers
                     .ThenInclude(r => r.Doctor)
                     .ThenInclude(d => d.User)
                 .Include(p => p.MedicalRecords)
+                .Include(p => p.Referrals)
+                    .ThenInclude(r => r.FromDoctor)
+                        .ThenInclude(d => d.User)
+                .Include(p => p.Referrals)
+                    .ThenInclude(r => r.ToDoctor)
+                        .ThenInclude(d => d.User)
                 .FirstOrDefaultAsync(p => p.Id == patientId);
 
             if (patient == null)
