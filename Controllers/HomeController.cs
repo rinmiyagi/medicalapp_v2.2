@@ -17,6 +17,17 @@ namespace medicalapp.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Admin"))
+                    return RedirectToAction("Dashboard", "Admin");
+                if (User.IsInRole("Doctor"))
+                    return RedirectToAction("Dashboard", "Doctor");
+                if (User.IsInRole("Receptionist"))
+                    return RedirectToAction("Dashboard", "Receptionist");
+                
+                return RedirectToAction("Dashboard", "Patient");
+            }
             return View();
         }
 
