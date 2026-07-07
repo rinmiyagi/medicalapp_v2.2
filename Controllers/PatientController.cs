@@ -69,10 +69,11 @@ namespace medicalapp.Controllers
         }
 
         // GET: Book Appointment
-        public async Task<IActionResult> BookAppointment()
+        public async Task<IActionResult> BookAppointment(int? doctorId)
         {
             var viewModel = new BookAppointmentViewModel
             {
+                DoctorId = doctorId ?? 0,
                 Doctors = await _context.Doctors
                     .Include(d => d.User)
                     .Where(d => d.IsVerified)
