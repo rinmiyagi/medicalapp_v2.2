@@ -21,6 +21,12 @@ namespace medicalapp.Controllers
             _userManager = userManager;
         }
 
+        // GET: Doctor (Redirect to Dashboard)
+        public IActionResult Index()
+        {
+            return RedirectToAction("Dashboard");
+        }
+
         // GET: Doctor Dashboard
         public async Task<IActionResult> Dashboard()
         {
