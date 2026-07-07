@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "MediCloud Hospital - Your Health, Our Priority";
     Layout = "_Layout";
 }
@@ -20,42 +20,60 @@
     <div class="container">
         <h2 class="section-title">Our Medical Departments</h2>
         <p class="section-subtitle">Leading healthcare across a wide range of specialties</p>
-        <div class="department-grid">
-            <div class="dept-card">
-                <i class="fas fa-heart"></i>
-                <h3>Cardiology</h3>
-                <p>Comprehensive heart care from diagnosis to treatment and recovery.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+        <div class="row g-4">
+            <!-- Cardiology -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-heart"></i>
+                    <h3>Cardiology</h3>
+                    <p>Comprehensive heart care from diagnosis to treatment and recovery.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
-            <div class="dept-card">
-                <i class="fas fa-baby"></i>
-                <h3>Pediatrics</h3>
-                <p>Specialized care for children from birth through adolescence.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+            <!-- Pediatrics -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-baby"></i>
+                    <h3>Pediatrics</h3>
+                    <p>Specialized care for children from birth through adolescence.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
-            <div class="dept-card">
-                <i class="fas fa-bone"></i>
-                <h3>Orthopedics</h3>
-                <p>Treatment for conditions of the bones, joints, and spine.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+            <!-- Orthopedics -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-bone"></i>
+                    <h3>Orthopedics</h3>
+                    <p>Treatment for conditions of the bones, joints, and spine.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
-            <div class="dept-card">
-                <i class="fas fa-brain"></i>
-                <h3>Neurology</h3>
-                <p>Advanced care for disorders of the brain and nervous system.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+            <!-- Neurology -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-brain"></i>
+                    <h3>Neurology</h3>
+                    <p>Advanced care for disorders of the brain and nervous system.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
-            <div class="dept-card">
-                <i class="fas fa-lungs"></i>
-                <h3>Pulmonology</h3>
-                <p>Diagnosis and treatment of respiratory conditions and lung diseases.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+            <!-- Pulmonology -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-lungs"></i>
+                    <h3>Pulmonology</h3>
+                    <p>Diagnosis and treatment of respiratory conditions and lung diseases.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
-            <div class="dept-card">
-                <i class="fas fa-robot"></i>
-                <h3>Robotic Surgery</h3>
-                <p>Minimally invasive surgery using the latest robotic technology.</p>
-                <a href="#" class="dept-link">Learn More →</a>
+            <!-- Robotic Surgery -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="dept-card h-100">
+                    <i class="fas fa-robot"></i>
+                    <h3>Robotic Surgery</h3>
+                    <p>Minimally invasive surgery using the latest robotic technology.</p>
+                    <a href="#" class="dept-link">Learn More →</a>
+                </div>
             </div>
         </div>
     </div>
@@ -66,41 +84,50 @@
     <div class="container">
         <h2 class="section-title">Health Screening Packages</h2>
         <p class="section-subtitle">Affordable and comprehensive health screenings to keep you healthy</p>
-        <div class="package-grid">
-            <div class="package-card featured">
-                <span class="package-badge">Most Popular</span>
-                <h3>Executive Wellness</h3>
-                <p class="package-price">RM 499</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Complete Blood Count</li>
-                    <li><i class="fas fa-check-circle"></i> Cholesterol & Diabetes Screening</li>
-                    <li><i class="fas fa-check-circle"></i> Chest X-Ray</li>
-                    <li><i class="fas fa-check-circle"></i> ECG</li>
-                    <li><i class="fas fa-check-circle"></i> Specialist Consultation</li>
-                </ul>
-                <a href="@Url.Action("Packages")" class="btn btn-primary btn-block">Book Now</a>
+        <div class="row g-4 justify-content-center">
+            <!-- Executive Wellness -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card featured h-100">
+                    <span class="package-badge">Most Popular</span>
+                    <h3>Executive Wellness</h3>
+                    <p class="package-price">RM 499</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Complete Blood Count</li>
+                        <li><i class="fas fa-check-circle"></i> Cholesterol & Diabetes Screening</li>
+                        <li><i class="fas fa-check-circle"></i> Chest X-Ray</li>
+                        <li><i class="fas fa-check-circle"></i> ECG</li>
+                        <li><i class="fas fa-check-circle"></i> Specialist Consultation</li>
+                    </ul>
+                    <a href="@Url.Action("Packages")" class="btn btn-primary btn-block">Book Now</a>
+                </div>
             </div>
-            <div class="package-card">
-                <h3>Basic Health Check</h3>
-                <p class="package-price">RM 199</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Blood Pressure Check</li>
-                    <li><i class="fas fa-check-circle"></i> Blood Glucose Test</li>
-                    <li><i class="fas fa-check-circle"></i> Cholesterol Test</li>
-                    <li><i class="fas fa-check-circle"></i> BMI Assessment</li>
-                </ul>
-                <a href="@Url.Action("Packages")" class="btn btn-outline btn-block">Book Now</a>
+            <!-- Basic Health Check -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card h-100">
+                    <h3>Basic Health Check</h3>
+                    <p class="package-price">RM 199</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Blood Pressure Check</li>
+                        <li><i class="fas fa-check-circle"></i> Blood Glucose Test</li>
+                        <li><i class="fas fa-check-circle"></i> Cholesterol Test</li>
+                        <li><i class="fas fa-check-circle"></i> BMI Assessment</li>
+                    </ul>
+                    <a href="@Url.Action("Packages")" class="btn btn-outline btn-block">Book Now</a>
+                </div>
             </div>
-            <div class="package-card">
-                <h3>Heart Screening</h3>
-                <p class="package-price">RM 349</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Cardiac Risk Assessment</li>
-                    <li><i class="fas fa-check-circle"></i> ECG</li>
-                    <li><i class="fas fa-check-circle"></i> Stress Test</li>
-                    <li><i class="fas fa-check-circle"></i> Lipid Profile</li>
-                </ul>
-                <a href="@Url.Action("Packages")" class="btn btn-outline btn-block">Book Now</a>
+            <!-- Heart Screening -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card h-100">
+                    <h3>Heart Screening</h3>
+                    <p class="package-price">RM 349</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Cardiac Risk Assessment</li>
+                        <li><i class="fas fa-check-circle"></i> ECG</li>
+                        <li><i class="fas fa-check-circle"></i> Stress Test</li>
+                        <li><i class="fas fa-check-circle"></i> Lipid Profile</li>
+                    </ul>
+                    <a href="@Url.Action("Packages")" class="btn btn-outline btn-block">Book Now</a>
+                </div>
             </div>
         </div>
     </div>

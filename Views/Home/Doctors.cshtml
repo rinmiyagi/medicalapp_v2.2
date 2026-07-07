@@ -1,3 +1,5 @@
+@model IEnumerable<medicalapp.Models.Doctor>
+
 @{
     ViewData["Title"] = "Find a Doctor - MediCloud Hospital";
     Layout = "_Layout";
@@ -14,67 +16,111 @@
     <div class="container">
         <div class="search-box">
             <input type="text" placeholder="Search by name, specialty, or location..." id="doctorSearch" />
-            <button onclick="searchDoctors()"><i class="fas fa-search"></i> Search</button>
+            <button><i class="fas fa-search"></i> Search</button>
         </div>
         <div class="filter-tags">
-            <span class="filter-tag active">All</span>
-            <span class="filter-tag">Cardiology</span>
-            <span class="filter-tag">Pediatrics</span>
-            <span class="filter-tag">Orthopedics</span>
-            <span class="filter-tag">Neurology</span>
-            <span class="filter-tag">Pulmonology</span>
+            <span class="filter-tag active" data-specialty="All">All</span>
+            @foreach (var specialty in Model.Select(d => d.Specialization).Distinct().OrderBy(s => s))
+            {
+                <span class="filter-tag" data-specialty="@specialty">@specialty</span>
+            }
         </div>
     </div>
 </section>
 
 <section class="doctor-grid-section">
     <div class="container">
-        <div class="doctor-grid">
-            <!-- Doctor Card 1 -->
-            <div class="doctor-card">
-                <div class="doctor-image">
-                    <img src="/images/doctor-placeholder.jpg" alt="Dr. Siti Aminah" />
-                </div>
-                <div class="doctor-info">
-                    <h3>Dr. Siti Aminah</h3>
-                    <p class="specialty">Cardiology</p>
-                    <p class="experience">12 years experience</p>
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                        <span>(127 reviews)</span>
+        <div class="row g-4" id="doctorContainer">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var doctor in Model)
+                {
+                    <div class="col-12 col-md-6 col-lg-4 doctor-card-wrapper" 
+                         data-specialty="@doctor.Specialization" 
+                         data-name="Dr. @doctor.User.FirstName @doctor.User.LastName" 
+                         data-location="@(doctor.ClinicName ?? "MediCloud Hospital")">
+                        <div class="doctor-card h-100">
+                            <div class="doctor-image">
+                                <img src="/images/doctor-placeholder.jpg" alt="Dr. @doctor.User.FirstName @doctor.User.LastName" onerror="this.style.opacity='0';" />
+                            </div>
+                            <div class="doctor-info">
+                                <h3>Dr. @doctor.User.FirstName @doctor.User.LastName</h3>
+                                <p class="specialty">@doctor.Specialization</p>
+                                <p class="experience">@doctor.YearsOfExperience years experience</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span>(99 reviews)</span>
+                                </div>
+                                <p class="location"><i class="fas fa-map-marker-alt"></i> @(doctor.ClinicName ?? "MediCloud Hospital")</p>
+                                <p class="fee">Consultation: RM @doctor.ConsultationFee.ToString("F2")</p>
+                                <a href="#" class="btn btn-primary btn-block">Book Appointment</a>
+                            </div>
+                        </div>
                     </div>
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> KL Sentral</p>
-                    <p class="fee">Consultation: RM 150</p>
-                    <a href="#" class="btn btn-primary btn-block">Book Appointment</a>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-user-md-slash" style="font-size: 4rem; color: #adb5bd; margin-bottom: 15px;"></i>
+                    <p style="color: #6c757d; font-size: 1.1rem;">No doctors found at the moment.</p>
                 </div>
-            </div>
-
-            <!-- Doctor Card 2 -->
-            <div class="doctor-card">
-                <div class="doctor-image">
-                    <img src="/images/doctor-placeholder.jpg" alt="Dr. Ahmad Fazli" />
-                </div>
-                <div class="doctor-info">
-                    <h3>Dr. Ahmad Fazli</h3>
-                    <p class="specialty">Cardiology</p>
-                    <p class="experience">8 years experience</p>
-                    <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <span>(89 reviews)</span>
-                    </div>
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> TTDI</p>
-                    <p class="fee">Consultation: RM 120</p>
-                    <a href="#" class="btn btn-primary btn-block">Book Appointment</a>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("doctorSearch");
+            const filterTags = document.querySelectorAll(".filter-tag");
+            const doctorCards = document.querySelectorAll(".doctor-card-wrapper");
+
+            let activeSpecialty = "All";
+            let searchQuery = "";
+
+            function filterDoctors() {
+                doctorCards.forEach(card => {
+                    const specialty = card.getAttribute("data-specialty");
+                    const name = card.getAttribute("data-name").toLowerCase();
+                    const location = card.getAttribute("data-location").toLowerCase();
+
+                    const matchSpecialty = (activeSpecialty === "All" || specialty === activeSpecialty);
+                    const matchSearch = (
+                        name.includes(searchQuery) || 
+                        specialty.toLowerCase().includes(searchQuery) || 
+                        location.includes(searchQuery)
+                    );
+
+                    if (matchSpecialty && matchSearch) {
+                        card.style.display = "block";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            }
+
+            // Search Input Handler (Real-time Filtering)
+            searchInput.addEventListener("input", function (e) {
+                searchQuery = e.target.value.toLowerCase().trim();
+                filterDoctors();
+            });
+
+            // Filter Tag Click Handler
+            filterTags.forEach(tag => {
+                tag.addEventListener("click", function () {
+                    filterTags.forEach(t => t.classList.remove("active"));
+                    tag.classList.add("active");
+
+                    activeSpecialty = tag.getAttribute("data-specialty");
+                    filterDoctors();
+                });
+            });
+        });
+    </script>
+}
