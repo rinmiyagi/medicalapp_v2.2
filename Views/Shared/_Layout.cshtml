@@ -26,11 +26,29 @@
             
             <div class="navbar-collapse" id="navbarCollapse">
                 <ul class="nav-links">
-                    <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
-                    <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
-                    <li><a href="@Url.Action("Services", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
-                    <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
-                    <li><a href="@Url.Action("Contact", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Doctor"))
+                    {
+                        <li><a href="@Url.Action("Appointments", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "Appointments" ? "active" : "")"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+                        <li><a href="@Url.Action("MyPatients", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "MyPatients" ? "active" : "")"><i class="fas fa-notes-medical"></i> EMR</a></li>
+                        <li>
+                            <a href="@Url.Action("MyReferrals", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "MyReferrals" ? "active" : "")">
+                                <i class="fas fa-share-alt"></i> Referrals
+                                @if (ViewBag.PendingReferrals > 0)
+                                {
+                                    <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
+                                }
+                            </a>
+                        </li>
+                        <li><a href="@Url.Action("Schedules", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "Schedules" ? "active" : "")"><i class="fas fa-calendar-alt"></i> My Schedule</a></li>
+                    }
+                    else
+                    {
+                        <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
+                        <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
+                        <li><a href="@Url.Action("Services", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
+                        <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
+                        <li><a href="@Url.Action("Contact", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
+                    }
                 </ul>
                 <div class="nav-right">
                     <div class="nav-buttons">
@@ -73,22 +91,7 @@
                                             <i class="fas fa-file-invoice"></i> My Invoices
                                         </a>
                                     }
-                                    @if (User.IsInRole("Doctor"))
-                                    {
-                                        <a href="@Url.Action("MyPatients", "Doctor")">
-                                            <i class="fas fa-notes-medical"></i> EMR
-                                        </a>
-                                        <a href="@Url.Action("MyReferrals", "Doctor")">
-                                            <i class="fas fa-share-alt"></i> Referrals
-                                            @if (ViewBag.PendingReferrals > 0)
-                                            {
-                                                <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
-                                            }
-                                        </a>
-                                        <a href="@Url.Action("Schedules", "Doctor")">
-                                            <i class="fas fa-calendar-alt"></i> My Schedule
-                                        </a>
-                                    }
+
                                     @if (User.IsInRole("Admin"))
                                     {
                                         <a href="@Url.Action("Users", "Admin")">
