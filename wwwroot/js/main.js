@@ -70,3 +70,37 @@ document.addEventListener('click', function(event) {
         }
     }
 });
+
+let currentConfirmCallback = null;
+
+function showConfirm(title, message, confirmCallback) {
+    const titleEl = document.getElementById('globalConfirmTitle');
+    const msgEl = document.getElementById('globalConfirmMessage');
+    const modalEl = document.getElementById('globalConfirmModal');
+    
+    if (titleEl) titleEl.innerText = title;
+    if (msgEl) msgEl.innerText = message;
+    
+    currentConfirmCallback = confirmCallback;
+    
+    if (modalEl) {
+        $(modalEl).css('display', 'flex').hide().fadeIn(200);
+    }
+}
+
+$(document).ready(function() {
+    // Global confirm modal Close listeners
+    $('#globalConfirmCancelBtn, .global-close-modal').on('click', function() {
+        $('#globalConfirmModal').fadeOut(200);
+        currentConfirmCallback = null;
+    });
+
+    // Global confirm modal Yes (submit) action listener
+    $('#globalConfirmYesBtn').on('click', function() {
+        if (typeof currentConfirmCallback === 'function') {
+            currentConfirmCallback();
+        }
+        $('#globalConfirmModal').fadeOut(200);
+        currentConfirmCallback = null;
+    });
+});
