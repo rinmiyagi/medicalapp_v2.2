@@ -17,7 +17,7 @@
 
         <div class="booking-card">
             <form asp-action="BookAppointment" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="All" class="text-danger"></div>
 
                 <div class="form-group">
                     <label asp-for="PatientId"></label>
@@ -29,10 +29,14 @@
 
                 <div class="form-group">
                     <label asp-for="DoctorId"></label>
-                    <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
+                    <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control" id="DoctorId">
                         <option value="">-- Select Doctor --</option>
                     </select>
                     <span asp-validation-for="DoctorId" class="text-danger"></span>
+                    <div id="availableDaysContainer" class="alert alert-info mt-2 py-2 px-3" style="display: none; font-size: 0.85rem; background: #eef5fc; border-color: #d0e3f5; color: #0056a7; border-radius: 8px;">
+                        <i class="fas fa-calendar-alt me-1"></i> Available days for this doctor: 
+                        <strong id="availableDaysList"></strong>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -60,6 +64,25 @@
                     <label asp-for="Symptoms"></label>
                     <textarea asp-for="Symptoms" class="form-control" rows="3" placeholder="Describe symptoms (optional)"></textarea>
                     <span asp-validation-for="Symptoms" class="text-danger"></span>
+                </div>
+
+                <!-- Summary -->
+                <div class="form-step summary mt-4" id="feeSummarySection" style="display: none; border-top: 1px solid #eee; padding-top: 20px; margin-bottom: 20px;">
+                    <h4 style="color: #003366; font-size: 1rem; margin-bottom: 15px;">Appointment Summary</h4>
+                    <div class="summary-grid" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="summary-item" style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+                            <span class="summary-label" style="color: #666;">Consultation Fee:</span>
+                            <span class="summary-value" style="font-weight: 600; color: #333;">RM <span id="feeDisplay">0.00</span></span>
+                        </div>
+                        <div class="summary-item" style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+                            <span class="summary-label" style="color: #666;">Tax (6%):</span>
+                            <span class="summary-value" style="font-weight: 600; color: #333;">RM <span id="taxDisplay">0.00</span></span>
+                        </div>
+                        <div class="summary-item total" style="display: flex; justify-content: space-between; font-size: 1.1rem; border-top: 2px solid #0056a7; padding-top: 10px; margin-top: 5px;">
+                            <span class="summary-label" style="font-weight: 700; color: #003366;">Total Amount:</span>
+                            <span class="summary-value" style="font-weight: 800; color: #003366;">RM <span id="totalDisplay">0.00</span></span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -166,17 +189,76 @@
             const slotSection = document.getElementById("slotSection");
             const slotsContainer = document.getElementById("slotsContainer");
             const hiddenDateInput = document.getElementById("AppointmentDateHidden");
-
             let selectedTime = null;
+            let availableDays = [];
+
+            // Fetch Doctor Schedule & Price
+            async function fetchDoctorSchedule() {
+                const doctorId = doctorSelect.value;
+                if (!doctorId) {
+                    document.getElementById("availableDaysContainer").style.display = "none";
+                    document.getElementById("feeSummarySection").style.display = "none";
+                    availableDays = [];
+                    resetSlots();
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/Patient/GetDoctorSchedule?doctorId=${doctorId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Show available days
+                        availableDays = data.availableDays || [];
+                        if (availableDays.length > 0) {
+                            document.getElementById("availableDaysList").textContent = availableDays.join(", ");
+                            document.getElementById("availableDaysContainer").style.display = "block";
+                        } else {
+                            document.getElementById("availableDaysContainer").style.display = "none";
+                        }
+
+                        // Show fee summary
+                        const fee = parseFloat(data.fee) || 0;
+                        const tax = fee * 0.06;
+                        const total = fee + tax;
+
+                        document.getElementById("feeDisplay").textContent = fee.toFixed(2);
+                        document.getElementById("taxDisplay").textContent = tax.toFixed(2);
+                        document.getElementById("totalDisplay").textContent = total.toFixed(2);
+                        document.getElementById("feeSummarySection").style.display = "block";
+
+                        // Trigger slot update in case date was already picked
+                        updateAvailableSlots();
+                    }
+                } catch (error) {
+                    console.error("Error fetching doctor schedule:", error);
+                }
+            }
+
+            function resetSlots() {
+                slotSection.style.display = "none";
+                slotsContainer.innerHTML = "";
+                selectedTime = null;
+                hiddenDateInput.value = "";
+            }
 
             async function updateAvailableSlots() {
                 const doctorId = doctorSelect.value;
                 const dateVal = datePicker.value;
 
                 if (!doctorId || !dateVal) {
-                    slotSection.style.display = "none";
-                    slotsContainer.innerHTML = "";
-                    selectedTime = null;
+                    resetSlots();
+                    return;
+                }
+
+                // Day of week check
+                const selectedDate = new Date(dateVal);
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const selectedDayName = dayNames[selectedDate.getDay()];
+
+                if (availableDays.length > 0 && !availableDays.includes(selectedDayName)) {
+                    slotsContainer.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> This doctor is not available on ${selectedDayName}s. Available days: ${availableDays.join(", ")}</span>`;
+                    slotSection.style.display = "block";
                     hiddenDateInput.value = "";
                     return;
                 }
@@ -218,24 +300,28 @@
                 }
             }
 
-            doctorSelect.addEventListener("change", updateAvailableSlots);
+            doctorSelect.addEventListener("change", fetchDoctorSchedule);
             datePicker.addEventListener("change", updateAvailableSlots);
 
             // Initial check on load
-            if (doctorSelect.value && hiddenDateInput.value) {
-                const dt = new Date(hiddenDateInput.value);
-                if (!isNaN(dt.getTime())) {
-                    const yyyy = dt.getFullYear();
-                    const mm = String(dt.getMonth() + 1).padStart(2, '0');
-                    const dd = String(dt.getDate()).padStart(2, '0');
-                    datePicker.value = `${yyyy}-${mm}-${dd}`;
-                    
-                    const hh = String(dt.getHours()).padStart(2, '0');
-                    const min = String(dt.getMinutes()).padStart(2, '0');
-                    selectedTime = `${hh}:${min}`;
-                    
-                    updateAvailableSlots();
-                }
+            if (doctorSelect.value) {
+                fetchDoctorSchedule().then(() => {
+                    if (hiddenDateInput.value) {
+                        const dt = new Date(hiddenDateInput.value);
+                        if (!isNaN(dt.getTime())) {
+                            const yyyy = dt.getFullYear();
+                            const mm = String(dt.getMonth() + 1).padStart(2, '0');
+                            const dd = String(dt.getDate()).padStart(2, '0');
+                            datePicker.value = `${yyyy}-${mm}-${dd}`;
+                            
+                            const hh = String(dt.getHours()).padStart(2, '0');
+                            const min = String(dt.getMinutes()).padStart(2, '0');
+                            selectedTime = `${hh}:${min}`;
+                            
+                            updateAvailableSlots();
+                        }
+                    }
+                });
             }
         });
     </script>

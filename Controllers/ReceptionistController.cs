@@ -42,12 +42,14 @@ namespace medicalapp.Controllers
                 .ToListAsync();
 
             var pendingCount = await _context.Appointments
-                .CountAsync(a => a.Status == "Pending");
+                .CountAsync(a => a.Status == "Pending" || (a.Status == "Confirmed" && a.AppointmentDate.Date == today));
 
             var todayCount = todayAppointments.Count;
+            var totalPatients = await _context.Patients.CountAsync();
 
             ViewBag.TodayCount = todayCount;
             ViewBag.PendingCount = pendingCount;
+            ViewBag.TotalPatients = totalPatients;
 
             return View(todayAppointments);
         }
@@ -205,7 +207,7 @@ namespace medicalapp.Controllers
         // GET: All Appointments
         public async Task<IActionResult> AllAppointments(string status = "all")
         {
-            var query = _context.Appointments
+            IQueryable<Appointment> query = _context.Appointments
                 .Include(a => a.Patient)
                     .ThenInclude(p => p.User)
                 .Include(a => a.Doctor)
@@ -213,7 +215,7 @@ namespace medicalapp.Controllers
 
             if (status != "all")
             {
-                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Appointment, ApplicationUser>)query.Where(a => a.Status.ToLower() == status.ToLower());
+                query = query.Where(a => a.Status.ToLower() == status.ToLower());
             }
 
             var appointments = await query

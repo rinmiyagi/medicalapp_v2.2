@@ -33,8 +33,8 @@ namespace medicalapp.Models.ViewModels
         [Compare("Password")]
         public string ConfirmPassword { get; set; }
 
-        public string EmergencyContactName { get; set; }
-        public string EmergencyContactPhone { get; set; }
-        public string EmergencyContactRelationship { get; set; }
+        public string? EmergencyContactName { get; set; }
+        public string? EmergencyContactPhone { get; set; }
+        public string? EmergencyContactRelationship { get; set; }
     }
 }
