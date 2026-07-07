@@ -31,8 +31,8 @@
             <div class="stat-card">
                 <i class="fas fa-users"></i>
                 <div class="stat-info">
-                    <span class="stat-number">@Model.Count</span>
-                    <span class="stat-label">Total Appointments</span>
+                    <span class="stat-number">@(ViewBag.TotalPatients ?? 0)</span>
+                    <span class="stat-label">Total Patients</span>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                                 <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
                             </div>
                             <div class="appointment-actions">
-                                @if (appt.Status == "Pending")
+                                @if (appt.Status == "Pending" || appt.Status == "Confirmed")
                                 {
                                     <form asp-action="CheckIn" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()
@@ -75,7 +75,7 @@
                                         <button type="submit" class="btn btn-sm btn-success">Check In</button>
                                     </form>
                                 }
-                                @if (appt.Status == "InProgress")
+                                @if (appt.Status == "InProgress" || (appt.Status == "Completed" && !appt.IsPaid))
                                 {
                                     <form asp-action="CheckOut" method="post" style="display:inline;">
                                         @Html.AntiForgeryToken()

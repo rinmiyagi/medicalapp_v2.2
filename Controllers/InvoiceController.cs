@@ -118,8 +118,8 @@ namespace medicalapp.Controllers
             return RedirectToAction("Details", new { id = id });
         }
 
-        // GET: All Invoices (Admin only)
-        [Authorize(Roles = "Admin")]
+        // GET: All Invoices (Admin or Receptionist)
+        [Authorize(Roles = "Admin,Receptionist")]
         public async Task<IActionResult> Index(string status = "All", string lhdnStatus = "All")
         {
             var query = _context.Invoices

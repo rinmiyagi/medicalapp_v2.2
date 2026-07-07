@@ -465,6 +465,7 @@ namespace medicalapp.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDoctorFee(int doctorId)
         {
             var doctor = await _context.Doctors.FindAsync(doctorId);
@@ -476,6 +477,7 @@ namespace medicalapp.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAvailableSlots(int doctorId, string date)
         {
             if (doctorId <= 0 || string.IsNullOrEmpty(date))
@@ -547,6 +549,28 @@ namespace medicalapp.Controllers
             }
 
             return View(appointment);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDoctorSchedule(int doctorId)
+        {
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+
+            var schedules = await _context.Schedules
+                .Where(s => s.DoctorId == doctorId && s.IsAvailable)
+                .Select(s => s.DayOfWeek.ToString())
+                .Distinct()
+                .ToListAsync();
+
+            return Json(new { 
+                fee = doctor.ConsultationFee, 
+                availableDays = schedules 
+            });
         }
     }
 }

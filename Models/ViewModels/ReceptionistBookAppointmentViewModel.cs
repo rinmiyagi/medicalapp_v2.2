@@ -7,11 +7,11 @@ namespace medicalapp.Models.ViewModels
     {
         [Required]
         public int PatientId { get; set; }
-        public string PatientName { get; set; } // NEW
+        public string? PatientName { get; set; } // NEW
 
         [Required]
         public int DoctorId { get; set; }
-        public string DoctorName { get; set; } // NEW
+        public string? DoctorName { get; set; } // NEW
 
         [Required]
         public DateTime AppointmentDate { get; set; }
