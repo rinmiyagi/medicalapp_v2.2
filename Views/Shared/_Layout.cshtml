@@ -41,6 +41,13 @@
                         </li>
                         <li><a href="@Url.Action("Schedules", "Doctor")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Doctor" && ViewContext.RouteData.Values["action"]?.ToString() == "Schedules" ? "active" : "")"><i class="fas fa-calendar-alt"></i> My Schedule</a></li>
                     }
+                    else if (User.Identity.IsAuthenticated && User.IsInRole("Patient"))
+                    {
+                        <li><a href="@Url.Action("Appointments", "Patient")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Patient" && ViewContext.RouteData.Values["action"]?.ToString() == "Appointments" ? "active" : "")"><i class="fas fa-calendar-check"></i> My Appointments</a></li>
+                        <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")"><i class="fas fa-user-md"></i> Find a Doctor</a></li>
+                        <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")"><i class="fas fa-heartbeat"></i> Health Packages</a></li>
+                        <li><a href="@Url.Action("MyInvoices", "Invoice")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" && ViewContext.RouteData.Values["action"]?.ToString() == "MyInvoices" ? "active" : "")"><i class="fas fa-file-invoice"></i> My Invoices</a></li>
+                    }
                     else if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                     {
                         <li><a href="@Url.Action("Users", "Admin")" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && (ViewContext.RouteData.Values["action"]?.ToString() == "Users" || ViewContext.RouteData.Values["action"]?.ToString() == "UserDetails") ? "active" : "")"><i class="fas fa-users-cog"></i> Users</a></li>
@@ -94,12 +101,6 @@
                                     <a href="@Url.Action("Profile", "Account")">
                                         <i class="fas fa-user-cog"></i> My Profile
                                     </a>
-                                    @if (User.IsInRole("Patient"))
-                                    {
-                                        <a href="@Url.Action("MyInvoices", "Invoice")">
-                                            <i class="fas fa-file-invoice"></i> My Invoices
-                                        </a>
-                                    }
 
 
                                     <div class="dropdown-divider"></div>
