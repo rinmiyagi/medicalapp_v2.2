@@ -25,6 +25,12 @@ namespace medicalapp.Controllers
             _roleManager = roleManager;
         }
 
+        // GET: Admin (Redirect to Dashboard)
+        public IActionResult Index()
+        {
+            return RedirectToAction("Dashboard");
+        }
+
         // GET: Admin Dashboard
         public async Task<IActionResult> Dashboard()
         {

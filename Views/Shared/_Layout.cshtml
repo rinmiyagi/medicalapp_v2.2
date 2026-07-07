@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,11 +18,11 @@
                 <span class="hospital-badge">Hospital</span>
             </div>
             <ul class="nav-links">
-                <li><a href="@Url.Action("Index")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
-                <li><a href="@Url.Action("Doctors")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
-                <li><a href="@Url.Action("Services")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
-                <li><a href="@Url.Action("Packages")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
-                <li><a href="@Url.Action("Contact")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
+                <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
+                <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
+                <li><a href="@Url.Action("Services", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
+                <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
+                <li><a href="@Url.Action("Contact", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
             </ul>
             <div class="nav-right">
                 <span class="header-date">
@@ -135,10 +135,10 @@
                 <div class="footer-col">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="@Url.Action("Doctors")">Find a Doctor</a></li>
-                        <li><a href="@Url.Action("Services")">Our Services</a></li>
-                        <li><a href="@Url.Action("Packages")">Health Packages</a></li>
-                        <li><a href="#">Careers</a></li>
+                        <li><a href="@Url.Action("Doctors", "Home")">Find a Doctor</a></li>
+                        <li><a href="@Url.Action("Services", "Home")">Our Services</a></li>
+                        <li><a href="@Url.Action("Packages", "Home")">Health Packages</a></li>
+                        <li><a href="javascript:void(0);" onclick="showUpcomingToast('Careers')">Careers</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
