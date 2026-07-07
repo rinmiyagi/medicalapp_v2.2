@@ -10,43 +10,52 @@
     </div>
 </section>
 
-<section class="packages-grid-section">
+<section class="packages-grid-section py-5">
     <div class="container">
-        <div class="package-grid">
-            <div class="package-card featured">
-                <span class="package-badge">Most Popular</span>
-                <h3>Executive Wellness</h3>
-                <p class="package-price">RM 499</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Complete Blood Count</li>
-                    <li><i class="fas fa-check-circle"></i> Cholesterol & Diabetes Screening</li>
-                    <li><i class="fas fa-check-circle"></i> Chest X-Ray</li>
-                    <li><i class="fas fa-check-circle"></i> ECG</li>
-                    <li><i class="fas fa-check-circle"></i> Specialist Consultation</li>
-                </ul>
-                <a href="#" class="btn btn-primary btn-block">Book Now</a>
+        <div class="row g-4 justify-content-center mt-3">
+            <!-- Executive Wellness -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card featured h-100">
+                    <span class="package-badge">Most Popular</span>
+                    <h3>Executive Wellness</h3>
+                    <p class="package-price">RM 499</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Complete Blood Count</li>
+                        <li><i class="fas fa-check-circle"></i> Cholesterol & Diabetes Screening</li>
+                        <li><i class="fas fa-check-circle"></i> Chest X-Ray</li>
+                        <li><i class="fas fa-check-circle"></i> ECG</li>
+                        <li><i class="fas fa-check-circle"></i> Specialist Consultation</li>
+                    </ul>
+                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-primary btn-block">Book Now</a>
+                </div>
             </div>
-            <div class="package-card">
-                <h3>Basic Health Check</h3>
-                <p class="package-price">RM 199</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Blood Pressure Check</li>
-                    <li><i class="fas fa-check-circle"></i> Blood Glucose Test</li>
-                    <li><i class="fas fa-check-circle"></i> Cholesterol Test</li>
-                    <li><i class="fas fa-check-circle"></i> BMI Assessment</li>
-                </ul>
-                <a href="#" class="btn btn-outline btn-block">Book Now</a>
+            <!-- Basic Health Check -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card h-100">
+                    <h3>Basic Health Check</h3>
+                    <p class="package-price">RM 199</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Blood Pressure Check</li>
+                        <li><i class="fas fa-check-circle"></i> Blood Glucose Test</li>
+                        <li><i class="fas fa-check-circle"></i> Cholesterol Test</li>
+                        <li><i class="fas fa-check-circle"></i> BMI Assessment</li>
+                    </ul>
+                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-outline btn-block">Book Now</a>
+                </div>
             </div>
-            <div class="package-card">
-                <h3>Heart Screening</h3>
-                <p class="package-price">RM 349</p>
-                <ul class="package-features">
-                    <li><i class="fas fa-check-circle"></i> Cardiac Risk Assessment</li>
-                    <li><i class="fas fa-check-circle"></i> ECG</li>
-                    <li><i class="fas fa-check-circle"></i> Stress Test</li>
-                    <li><i class="fas fa-check-circle"></i> Lipid Profile</li>
-                </ul>
-                <a href="#" class="btn btn-outline btn-block">Book Now</a>
+            <!-- Heart Screening -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="package-card h-100">
+                    <h3>Heart Screening</h3>
+                    <p class="package-price">RM 349</p>
+                    <ul class="package-features">
+                        <li><i class="fas fa-check-circle"></i> Cardiac Risk Assessment</li>
+                        <li><i class="fas fa-check-circle"></i> ECG</li>
+                        <li><i class="fas fa-check-circle"></i> Stress Test</li>
+                        <li><i class="fas fa-check-circle"></i> Lipid Profile</li>
+                    </ul>
+                    <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-outline btn-block">Book Now</a>
+                </div>
             </div>
         </div>
     </div>
