@@ -73,11 +73,11 @@ namespace medicalapp.Controllers
                     _context.Patients.Add(patient);
                     await _context.SaveChangesAsync();
 
-                    // Sign in the user
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    // Generate email confirmation token
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                    // Redirect to home or patient dashboard
-                    return RedirectToAction("Index", "Home");
+                    // Redirect to RegisterSuccess
+                    return RedirectToAction("RegisterSuccess", "Account", new { email = user.Email, userId = user.Id, token = token });
                 }
 
                 foreach (var error in result.Errors)
@@ -121,6 +121,10 @@ namespace medicalapp.Controllers
                     else
                         return RedirectToAction("Dashboard", "Patient");
                 }
+                else if (result.IsNotAllowed)
+                {
+                    ModelState.AddModelError(string.Empty, "You must confirm your email before logging in. Please check your inbox.");
+                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -135,6 +139,54 @@ namespace medicalapp.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult RegisterSuccess(string email, string userId, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.Email = email;
+            ViewBag.UserId = userId;
+            ViewBag.Token = token;
+
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                ViewBag.Status = "Error";
+                ViewBag.Message = "Invalid confirmation link.";
+                return View();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.Status = "Error";
+                ViewBag.Message = "User not found.";
+                return View();
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                ViewBag.Status = "Success";
+                ViewBag.Message = "Thank you for confirming your email. You can now log in to your account.";
+            }
+            else
+            {
+                ViewBag.Status = "Error";
+                ViewBag.Message = "Email confirmation failed. The link might be expired or invalid.";
+            }
+
+            return View();
         }
     }
 }

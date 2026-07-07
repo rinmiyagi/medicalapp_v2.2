@@ -25,6 +25,17 @@ namespace medicalapp.Data
                 }
             }
 
+            // Ensure all existing seeded users have EmailConfirmed = true to support local testing transition
+            var unconfirmedUsers = await context.Users.Where(u => !u.EmailConfirmed).ToListAsync();
+            if (unconfirmedUsers.Any())
+            {
+                foreach (var u in unconfirmedUsers)
+                {
+                    u.EmailConfirmed = true;
+                }
+                await context.SaveChangesAsync();
+            }
+
             // Seed default users
             await SeedUser(userManager, roleManager, "admin@medicloud.com", "Admin123!", "Admin", "User", new[] { "Admin" });
             await SeedUser(userManager, roleManager, "doctor@medicloud.com", "Doctor123!", "Dr.", "Siti", new[] { "Doctor" });
@@ -44,7 +55,8 @@ namespace medicalapp.Data
                     Gender = "Female",
                     DateOfBirth = new DateTime(1990, 5, 15),
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    EmailConfirmed = true
                 };
                 var result = await userManager.CreateAsync(receptionistUser, "Receptionist123!");
                 if (result.Succeeded)
@@ -156,7 +168,8 @@ namespace medicalapp.Data
                         Gender = "Male",
                         DateOfBirth = new DateTime(1975, 1, 1),
                         IsActive = true,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.Now,
+                        EmailConfirmed = true
                     };
                     var result = await userManager.CreateAsync(user, "Doctor123!");
                     if (result.Succeeded)
@@ -231,7 +244,8 @@ namespace medicalapp.Data
                         Gender = p.gender,
                         DateOfBirth = p.dob,
                         IsActive = true,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.Now,
+                        EmailConfirmed = true
                     };
 
                     var result = await userManager.CreateAsync(user, "Patient123!");
@@ -510,7 +524,8 @@ namespace medicalapp.Data
                     Gender = "Male",
                     DateOfBirth = new DateTime(1980, 1, 1),
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    EmailConfirmed = true
                 };
                 var result = await userManager.CreateAsync(user, password);
                 if (result.Succeeded)
