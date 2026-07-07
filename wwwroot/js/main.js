@@ -104,3 +104,38 @@ $(document).ready(function() {
         currentConfirmCallback = null;
     });
 });
+
+function showToast(message, type = 'success') {
+    // Remove existing toast if present
+    const existing = document.getElementById('global-toast');
+    if (existing) {
+        existing.remove();
+    }
+
+    // Create toast container
+    const toast = document.createElement('div');
+    toast.id = 'global-toast';
+    toast.className = `custom-toast toast-${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    toast.innerHTML = `
+        <span class="custom-toast-icon"><i class="fas ${icon}"></i></span>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 50);
+
+    // Auto dismiss after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 4000);
+}

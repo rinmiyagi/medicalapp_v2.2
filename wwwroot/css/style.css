@@ -578,6 +578,21 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+.custom-toast.toast-success {
+    background-color: #28a745;
+    border-color: #218838;
+}
+.custom-toast.toast-success .custom-toast-icon {
+    color: #28a745;
+}
+.custom-toast.toast-danger {
+    background-color: #dc3545;
+    border-color: #bd2130;
+}
+.custom-toast.toast-danger .custom-toast-icon {
+    color: #dc3545;
+}
+
 .custom-toast-icon {
     color: #0056a7;
     background: #fff;
