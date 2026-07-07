@@ -1,0 +1,498 @@
+@model medicalapp.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile - MediCloud";
+    Layout = "_Layout";
+    var activeTab = ViewBag.ActiveTab as string ?? "details";
+}
+
+<div class="profile-settings-container">
+    <div class="container">
+        <h2>👤 My Profile Settings</h2>
+        <p class="text-muted">Manage your personal information, medical status, and password configuration.</p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+            </div>
+        }
+        <div asp-validation-summary="All" class="text-danger mb-3 fw-bold" style="font-size: 0.95rem;"></div>
+
+        <div class="profile-layout">
+            <!-- Left Panel: Avatar & Summary -->
+            <div class="profile-side-card">
+                <div class="avatar-wrapper">
+                    <div class="avatar-large">
+                        @if (Model.UserRole == "Doctor")
+                        {
+                            <i class="fas fa-user-md"></i>
+                        }
+                        else if (Model.UserRole == "Admin")
+                        {
+                            <i class="fas fa-user-shield"></i>
+                        }
+                        else if (Model.UserRole == "Receptionist")
+                        {
+                            <i class="fas fa-user-clock"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-user"></i>
+                        }
+                    </div>
+                </div>
+                <h3>@Model.FirstName @Model.LastName</h3>
+                <span class="role-badge @Model.UserRole?.ToLower()">
+                    <i class="fas @(Model.UserRole == "Doctor" ? "fa-stethoscope" : Model.UserRole == "Admin" ? "fa-crown" : Model.UserRole == "Receptionist" ? "fa-headset" : "fa-heartbeat")"></i>
+                    @Model.UserRole
+                </span>
+                
+                <div class="side-info-list">
+                    <div class="side-info-row">
+                        <span class="label">User ID:</span>
+                        <span class="val">#@Model.ICNumber</span>
+                    </div>
+                    <div class="side-info-row">
+                        <span class="label">Date of Birth:</span>
+                        <span class="val">@Model.DateOfBirth?.ToString("dd MMM yyyy")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tabs and Edit Forms -->
+            <div class="profile-main-card">
+                <!-- Navigation Tabs -->
+                <div class="profile-tabs">
+                    <button class="profile-tab-link @(activeTab == "details" ? "active" : "")" onclick="switchProfileTab(event, 'details-tab')">
+                        <i class="fas fa-user-edit"></i> Profile Details
+                    </button>
+                    <button class="profile-tab-link @(activeTab == "password" ? "active" : "")" onclick="switchProfileTab(event, 'password-tab')">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </div>
+
+                <!-- TAB CONTENT 1: DETAILS -->
+                <div id="details-tab" class="profile-tab-content @(activeTab == "details" ? "active" : "")">
+                    <form asp-action="Profile" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ICNumber" />
+                        <input type="hidden" asp-for="Gender" />
+                        <input type="hidden" asp-for="DateOfBirth" />
+                        
+                        <div class="form-section-title"><i class="fas fa-id-card"></i> Personal Information</div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label asp-for="FirstName"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="LastName"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label asp-for="Email"></label>
+                                <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Changing this updates your login ID.</small>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber"></label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="e.g. +60123456789" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label asp-for="ICNumber"></label>
+                                <input asp-for="ICNumber" class="form-control" disabled />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Gender"></label>
+                                <input asp-for="Gender" class="form-control" disabled />
+                            </div>
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input value="@Model.DateOfBirth?.ToString("yyyy-MM-dd")" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        <!-- PATIENT SPECIFIC SECTION -->
+                        @if (Model.UserRole == "Patient")
+                        {
+                            <div class="form-section-title mt-4"><i class="fas fa-phone-alt"></i> Emergency Contact</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label asp-for="EmergencyContactName">Contact Name</label>
+                                    <input asp-for="EmergencyContactName" class="form-control" placeholder="Emergency contact name" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="EmergencyContactPhone">Contact Phone</label>
+                                    <input asp-for="EmergencyContactPhone" class="form-control" placeholder="Emergency contact phone number" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="EmergencyContactRelationship">Relationship</label>
+                                    <input asp-for="EmergencyContactRelationship" class="form-control" placeholder="e.g. Spouse, Parent" />
+                                </div>
+                            </div>
+
+                            <div class="form-section-title mt-4"><i class="fas fa-notes-medical"></i> Medical Information (Self-Reported)</div>
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label asp-for="BloodType">Blood Type</label>
+                                    <select asp-for="BloodType" class="form-control">
+                                        <option value="">-- Select Blood Type --</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Allergies">Known Allergies</label>
+                                    <input asp-for="Allergies" class="form-control" placeholder="e.g. Penicillin, Peanuts (or None)" />
+                                </div>
+                            </div>
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label asp-for="ChronicConditions">Chronic Conditions</label>
+                                    <textarea asp-for="ChronicConditions" class="form-control" rows="2" placeholder="e.g. Asthma, Hypertension (or None)"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="CurrentMedications">Current Medications</label>
+                                    <textarea asp-for="CurrentMedications" class="form-control" rows="2" placeholder="List medications currently being taken"></textarea>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- DOCTOR SPECIFIC SECTION -->
+                        @if (Model.UserRole == "Doctor")
+                        {
+                            <div class="form-section-title mt-4"><i class="fas fa-stethoscope"></i> Practice Settings</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label asp-for="ConsultationFee">Consultation Fee (RM)</label>
+                                    <input asp-for="ConsultationFee" class="form-control" type="number" step="0.01" />
+                                    <span asp-validation-for="ConsultationFee" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="YearsOfExperience">Years of Experience</label>
+                                    <input asp-for="YearsOfExperience" class="form-control" type="number" />
+                                    <span asp-validation-for="YearsOfExperience" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Qualifications">Qualifications</label>
+                                    <input asp-for="Qualifications" class="form-control" placeholder="e.g. MBBS, MD, FRCP" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Bio">Professional Biography</label>
+                                <textarea asp-for="Bio" class="form-control" rows="3" placeholder="Write a short summary about your professional clinical profile..."></textarea>
+                            </div>
+
+                            <div class="form-section-title mt-4"><i class="fas fa-hospital"></i> Clinic Association Details</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label asp-for="ClinicName">Clinic Name</label>
+                                    <input asp-for="ClinicName" class="form-control" placeholder="Clinic / hospital branch name" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ClinicPhone">Clinic Phone</label>
+                                    <input asp-for="ClinicPhone" class="form-control" placeholder="Clinic contact number" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ClinicAddress">Clinic Address</label>
+                                    <input asp-for="ClinicAddress" class="form-control" placeholder="Clinic location street address" />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-footer mt-4">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile Details</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB CONTENT 2: CHANGE PASSWORD -->
+                <div id="password-tab" class="profile-tab-content @(activeTab == "password" ? "active" : "")">
+                    <form asp-action="ChangePassword" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="form-section-title"><i class="fas fa-lock"></i> Update Password Credentials</div>
+                        
+                        <div class="form-group max-width-500">
+                            <label asp-for="ChangePasswordModel.OldPassword">Current Password</label>
+                            <div class="password-container">
+                                <input asp-for="ChangePasswordModel.OldPassword" id="old-pass" class="form-control" type="password" placeholder="Enter current credentials" />
+                                <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility('old-pass', this)"></i>
+                            </div>
+                            <span asp-validation-for="ChangePasswordModel.OldPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group max-width-500">
+                            <label asp-for="ChangePasswordModel.NewPassword">New Password</label>
+                            <div class="password-container">
+                                <input asp-for="ChangePasswordModel.NewPassword" id="new-pass" class="form-control" type="password" placeholder="Min 6 characters" />
+                                <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility('new-pass', this)"></i>
+                            </div>
+                            <span asp-validation-for="ChangePasswordModel.NewPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group max-width-500">
+                            <label asp-for="ChangePasswordModel.ConfirmPassword">Confirm New Password</label>
+                            <div class="password-container">
+                                <input asp-for="ChangePasswordModel.ConfirmPassword" id="confirm-pass" class="form-control" type="password" placeholder="Re-type new credentials" />
+                                <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility('confirm-pass', this)"></i>
+                            </div>
+                            <span asp-validation-for="ChangePasswordModel.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-footer mt-4">
+                            <button type="submit" class="btn btn-warning"><i class="fas fa-key"></i> Update Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function switchProfileTab(event, tabId) {
+            // Hide all tab panes
+            $('.profile-tab-content').removeClass('active');
+            // Remove active style from tab buttons
+            $('.profile-tab-link').removeClass('active');
+            
+            // Show chosen tab pane
+            $('#' + tabId).addClass('active');
+            // Highlight current button
+            $(event.currentTarget).addClass('active');
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section Styles {
+    <style>
+        .profile-settings-container { padding: 40px 0; background: #f4f6f9; min-height: 85vh; }
+        .profile-settings-container h2 { color: #003366; margin-bottom: 5px; }
+        
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        /* Left Side Panel Card */
+        .profile-side-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            height: fit-content;
+        }
+        .avatar-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #eef5fc;
+            color: #0056a7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            border: 3px solid #dee2e6;
+        }
+        .profile-side-card h3 { color: #333; margin: 10px 0 5px 0; font-size: 1.25rem; }
+        
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .role-badge.patient { background: #e3f2fd; color: #0d47a1; }
+        .role-badge.doctor { background: #e8f5e9; color: #1b5e20; }
+        .role-badge.receptionist { background: #fff3e0; color: #e65100; }
+        .role-badge.admin { background: #f3e5f5; color: #4a148c; }
+
+        .side-info-list {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            text-align: left;
+        }
+        .side-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        .side-info-row .label { color: #777; }
+        .side-info-row .val { font-weight: 600; color: #333; }
+
+        /* Right Side Main Card */
+        .profile-main-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-tabs {
+            display: flex;
+            background: #fafbfc;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-tab-link {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .profile-tab-link:hover { color: #0056a7; background: #f1f3f7; }
+        .profile-tab-link.active {
+            color: #0056a7;
+            border-bottom-color: #0056a7;
+            background: white;
+        }
+
+        .profile-tab-content {
+            padding: 30px;
+            display: none;
+        }
+        .profile-tab-content.active { display: block; }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f1f1f1;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #555;
+            font-weight: 600;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #333;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { outline: none; border-color: #0056a7; }
+        .form-control:disabled { background: #f1f3f7; color: #888; cursor: not-allowed; }
+
+        .max-width-500 { max-width: 500px; }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .toggle-password:hover { color: #666; }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: #0056a7; color: white; }
+        .btn-primary:hover { background: #003d7a; }
+        
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .text-danger { font-size: 0.8rem; color: #dc3545; display: block; margin-top: 4px; }
+        
+        @@media (max-width: 768px) {
+            .profile-layout { grid-template-columns: 1fr; }
+            .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; gap: 0; }
+        }
+    </style>
+}
