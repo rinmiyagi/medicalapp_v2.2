@@ -1,0 +1,82 @@
+@model medicalapp.Models.Schedule
+
+@{
+    ViewData["Title"] = "Add Schedule Slot - MediCloud";
+    Layout = "_Layout";
+}
+
+<div class="doctor-container">
+    <div class="container" style="max-width: 600px;">
+        <div class="mb-4">
+            <h2>📅 Add Schedule Slot</h2>
+            <p class="text-muted">Register a new consulting day and working hours.</p>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3 p-4">
+            <form asp-action="AddSchedule" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="DoctorId" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <!-- Day of Week -->
+                <div class="mb-3">
+                    <label asp-for="DayOfWeek" class="form-label fw-bold">Day of Week</label>
+                    <select asp-for="DayOfWeek" class="form-select" asp-items="Html.GetEnumSelectList<DayOfWeek>()">
+                        <option value="">-- Select Day --</option>
+                    </select>
+                    <span asp-validation-for="DayOfWeek" class="text-danger small"></span>
+                </div>
+
+                <!-- Hours range -->
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label asp-for="StartTime" class="form-label fw-bold">Start Time</label>
+                        <input asp-for="StartTime" type="time" class="form-control" />
+                        <span asp-validation-for="StartTime" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label asp-for="EndTime" class="form-label fw-bold">End Time</label>
+                        <input asp-for="EndTime" type="time" class="form-control" />
+                        <span asp-validation-for="EndTime" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Slot Duration -->
+                <div class="mb-3">
+                    <label asp-for="SlotDuration" class="form-label fw-bold">Slot Duration (Minutes)</label>
+                    <select asp-for="SlotDuration" class="form-select">
+                        <option value="15">15 Minutes</option>
+                        <option value="30" selected>30 Minutes</option>
+                        <option value="45">45 Minutes</option>
+                        <option value="60">60 Minutes</option>
+                    </select>
+                    <span asp-validation-for="SlotDuration" class="text-danger small"></span>
+                </div>
+
+                <!-- Status availability -->
+                <div class="mb-4">
+                    <div class="form-check form-switch mt-2">
+                        <input asp-for="IsAvailable" class="form-check-input" type="checkbox" role="switch" checked>
+                        <label class="form-check-label fw-bold" asp-for="IsAvailable">Available for Appointments</label>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+                        <i class="fas fa-save me-1"></i> Save Slot
+                    </button>
+                    <a href="@Url.Action("Schedules")" class="btn btn-outline-secondary px-4 py-2 rounded-pill">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .doctor-container { padding: 40px 0; }
+        .doctor-container h2 { color: #003366; }
+        .form-switch .form-check-input { width: 3em; height: 1.5em; }
+    </style>
+}

@@ -85,6 +85,9 @@
                                                 <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
                                             }
                                         </a>
+                                        <a href="@Url.Action("Schedules", "Doctor")">
+                                            <i class="fas fa-calendar-alt"></i> My Schedule
+                                        </a>
                                     }
                                     @if (User.IsInRole("Admin"))
                                     {

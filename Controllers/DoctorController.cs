@@ -826,10 +826,92 @@ namespace medicalapp.Controllers
         return RedirectToAction("MyReferrals");
     }
 
+    // GET: Doctor/Schedules
+    public async Task<IActionResult> Schedules()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        if (doctor == null) return RedirectToAction("Index", "Home");
 
+        var schedules = await _context.Schedules
+            .Where(s => s.DoctorId == doctor.Id)
+            .OrderBy(s => s.DayOfWeek)
+            .ThenBy(s => s.StartTime)
+            .ToListAsync();
 
-
+        return View(schedules);
     }
 
+    // GET: Doctor/AddSchedule
+    public async Task<IActionResult> AddSchedule()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        if (doctor == null) return RedirectToAction("Index", "Home");
 
+        return View(new Schedule { DoctorId = doctor.Id });
+    }
+
+    // POST: Doctor/AddSchedule
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddSchedule(Schedule model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        if (doctor == null) return RedirectToAction("Index", "Home");
+
+        model.DoctorId = doctor.Id;
+
+        if (model.EndTime <= model.StartTime)
+        {
+            ModelState.AddModelError("", "End time must be after start time.");
+        }
+
+        var existsOverlap = await _context.Schedules
+            .AnyAsync(s => s.DoctorId == doctor.Id && s.DayOfWeek == model.DayOfWeek &&
+                           s.StartTime < model.EndTime && model.StartTime < s.EndTime);
+
+        if (existsOverlap)
+        {
+            ModelState.AddModelError("", "This schedule overlaps with an existing schedule for the same day.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            _context.Schedules.Add(model);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Schedule added successfully.";
+            return RedirectToAction("Schedules");
+        }
+
+        return View(model);
+    }
+
+    // POST: Doctor/DeleteSchedule
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSchedule(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == user.Id);
+        if (doctor == null) return RedirectToAction("Index", "Home");
+
+        var schedule = await _context.Schedules
+            .FirstOrDefaultAsync(s => s.Id == id && s.DoctorId == doctor.Id);
+
+        if (schedule != null)
+        {
+            _context.Schedules.Remove(schedule);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Schedule deleted successfully.";
+        }
+        else
+        {
+            TempData["Error"] = "Schedule not found.";
+        }
+
+        return RedirectToAction("Schedules");
+    }
+}
 }
