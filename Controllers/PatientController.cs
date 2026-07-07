@@ -344,5 +344,16 @@ namespace medicalapp.Controllers
             TempData["Success"] = "Appointment cancelled successfully.";
             return RedirectToAction("Dashboard");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDoctorFee(int doctorId)
+        {
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            return Json(new { fee = doctor.ConsultationFee });
+        }
     }
 }

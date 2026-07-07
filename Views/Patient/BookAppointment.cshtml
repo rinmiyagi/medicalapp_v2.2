@@ -218,3 +218,49 @@
         }
     </style>
 }
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorSelect = document.getElementById("DoctorId");
+            const feeDisplay = document.getElementById("feeDisplay");
+            const taxDisplay = document.getElementById("taxDisplay");
+            const totalDisplay = document.getElementById("totalDisplay");
+
+            async function updateFeeSummary() {
+                const doctorId = doctorSelect.value;
+                if (!doctorId) {
+                    feeDisplay.textContent = "0.00";
+                    taxDisplay.textContent = "0.00";
+                    totalDisplay.textContent = "0.00";
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/Patient/GetDoctorFee?doctorId=${doctorId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const fee = parseFloat(data.fee);
+                        const tax = fee * 0.06;
+                        const total = fee + tax;
+
+                        feeDisplay.textContent = fee.toFixed(2);
+                        taxDisplay.textContent = tax.toFixed(2);
+                        totalDisplay.textContent = total.toFixed(2);
+                    } else {
+                        console.error("Failed to fetch doctor fee: ", response.statusText);
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                }
+            }
+
+            doctorSelect.addEventListener("change", updateFeeSummary);
+
+            // Trigger once initially if value exists (validation fail recovery)
+            if (doctorSelect.value) {
+                updateFeeSummary();
+            }
+        });
+    </script>
+}
