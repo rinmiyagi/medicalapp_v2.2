@@ -22,7 +22,10 @@
 
                 <div class="form-group">
                     <label asp-for="Password"></label>
-                    <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
+                    <div class="password-container">
+                        <input asp-for="Password" id="password-field" class="form-control" type="password" placeholder="Enter your password" />
+                        <i class="fas fa-eye toggle-password" onclick="togglePasswordVisibility('password-field', this)"></i>
+                    </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 

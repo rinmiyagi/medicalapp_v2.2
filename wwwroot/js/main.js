@@ -29,3 +29,44 @@ function showUpcomingToast(featureName) {
         }, 300);
     }, 3000);
 }
+
+function togglePasswordVisibility(fieldId, toggleIcon) {
+    const passwordField = document.getElementById(fieldId);
+    if (!passwordField) return;
+
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        toggleIcon.classList.remove("fa-eye");
+        toggleIcon.classList.add("fa-eye-slash");
+    } else {
+        passwordField.type = "password";
+        toggleIcon.classList.remove("fa-eye-slash");
+        toggleIcon.classList.add("fa-eye");
+    }
+}
+
+function toggleMobileMenu() {
+    const navbarCollapse = document.getElementById('navbarCollapse');
+    if (navbarCollapse) {
+        navbarCollapse.classList.toggle('show');
+    }
+}
+
+function toggleUserDropdown(event) {
+    event.stopPropagation(); // Prevent bubbling up to document click listener
+    const menu = document.getElementById('userDropdownMenu');
+    if (menu) {
+        menu.classList.toggle('show');
+    }
+}
+
+// Automatically close the dropdown menu if clicked outside
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('userDropdownMenu');
+    const toggleBtn = document.querySelector('.dropdown-toggle');
+    if (menu && menu.classList.contains('show')) {
+        if (!menu.contains(event.target) && (!toggleBtn || !toggleBtn.contains(event.target))) {
+            menu.classList.remove('show');
+        }
+    }
+});
