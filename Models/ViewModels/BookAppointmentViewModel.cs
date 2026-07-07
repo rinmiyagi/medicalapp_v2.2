@@ -25,5 +25,11 @@ namespace medicalapp.Models.ViewModels
         public decimal ConsultationFee { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal TotalAmount { get; set; }
+
+        // Health Screening Package properties
+        public string? PackageName { get; set; }
+        public decimal? PackagePrice { get; set; }
+        public List<int> AvailableDaysOfWeek { get; set; } = new();
+        public List<string> AvailableDayNames { get; set; } = new();
     }
 }

@@ -28,10 +28,23 @@
                 {
                     <div class="appointment-card">
                         <div class="appointment-info">
+                            @if (appt.ReasonForVisit != null && appt.ReasonForVisit.StartsWith("Health Screening:"))
+                            {
+                                <span class="badge-screening"><i class="fas fa-heartbeat"></i> Screening</span>
+                            }
                             <span class="appt-date">@appt.AppointmentDate.ToString("dd MMM yyyy")</span>
                             <span class="appt-time">@appt.StartTime.ToString(@"hh\:mm")</span>
-                            <span class="appt-doctor">Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</span>
-                            <span class="appt-department">@appt.Doctor?.Specialization</span>
+                            <span class="appt-doctor">
+                                @if (appt.ReasonForVisit != null && appt.ReasonForVisit.StartsWith("Health Screening:"))
+                                {
+                                    @appt.ReasonForVisit.Replace("Health Screening: ", "")
+                                }
+                                else
+                                {
+                                    <text>Dr. @appt.Doctor?.User?.FirstName @appt.Doctor?.User?.LastName</text>
+                                }
+                            </span>
+                            <span class="appt-department">@(appt.ReasonForVisit != null && appt.ReasonForVisit.StartsWith("Health Screening:") ? "Wellness Center" : appt.Doctor?.Specialization)</span>
                         </div>
                         <div class="appointment-status">
                             <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
@@ -156,5 +169,19 @@
         .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
         .btn-danger { background: #dc3545; color: white; border: none; }
         .btn-danger:hover { background: #c82333; }
+
+        .badge-screening {
+            background: #eef5fc;
+            color: #0056a7;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-transform: uppercase;
+            border: 1px solid #d0e3f5;
+        }
     </style>
 }

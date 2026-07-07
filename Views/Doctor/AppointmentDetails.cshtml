@@ -14,6 +14,19 @@
             <div class="alert alert-success">@TempData["Success"]</div>
         }
 
+        @if (Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:"))
+        {
+            <div class="package-banner-card mb-4">
+                <div class="package-banner-title">
+                    <i class="fas fa-heartbeat text-danger animate-pulse"></i>
+                    <span>@Model.ReasonForVisit</span>
+                </div>
+                <div class="package-banner-text mt-2" style="font-size: 0.9rem; color: #003366;">
+                    <i class="fas fa-info-circle"></i> <strong>Health Screening Package:</strong> EMR records for this visit should focus on checkup assessment. You can generate a medical report after completing the examination.
+                </div>
+            </div>
+        }
+
         <div class="details-card">
             <!-- Patient Information -->
             <div class="section">
@@ -112,32 +125,33 @@
             <!-- Clinical Notes (Doctor's input) -->
             @if (Model.Status == "Confirmed" || Model.Status == "InProgress" || Model.Status == "Completed")
             {
+                var isScreening = Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:");
                 <div class="section clinical-section">
-                    <h3>🩺 Clinical Notes</h3>
+                    <h3>@(isScreening ? "🩺 Screening Assessment" : "🩺 Clinical Notes")</h3>
                     
                     <form asp-action="UpdateClinicalNotes" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id" />
                         
                         <div class="form-group">
-                            <label>Diagnosis</label>
+                            <label>@(isScreening ? "Overall Assessment" : "Diagnosis")</label>
                             <input type="text" name="diagnosis" class="form-control" 
-                                   value="@Model.Diagnosis" placeholder="e.g., Hypertension, Diabetes Type 2" />
+                                   value="@Model.Diagnosis" placeholder="@(isScreening ? "e.g., Normal, Borderline Lipid Profile, Mild Obesity" : "e.g., Hypertension, Diabetes Type 2")" />
                         </div>
                         
                         <div class="form-group">
-                            <label>Treatment Plan</label>
+                            <label>@(isScreening ? "Wellness & Lifestyle Recommendations" : "Treatment Plan")</label>
                             <textarea name="treatmentPlan" class="form-control" rows="3" 
-                                      placeholder="e.g., Prescribed Amlodipine 5mg, Follow-up in 2 weeks">@Model.TreatmentPlan</textarea>
+                                      placeholder="@(isScreening ? "e.g., Recommend healthy low-fat diet, regular cardiovascular exercise" : "e.g., Prescribed Amlodipine 5mg, Follow-up in 2 weeks")">@Model.TreatmentPlan</textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label>Clinical Notes</label>
+                            <label>@(isScreening ? "Screening Review Notes" : "Clinical Notes")</label>
                             <textarea name="clinicalNotes" class="form-control" rows="4" 
-                                      placeholder="Detailed notes about the consultation">@Model.ClinicalNotes</textarea>
+                                      placeholder="@(isScreening ? "Detailed review notes of the screening results" : "Detailed notes about the consultation")">@Model.ClinicalNotes</textarea>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">💾 Save Clinical Notes</button>
+                        <button type="submit" class="btn btn-primary">💾 Save Assessment</button>
                     </form>
                 </div>
             }
@@ -189,14 +203,18 @@
                     }
                     @if (Model.Status == "Confirmed" || Model.Status == "InProgress")
                     {
-                        <a href="@Url.Action("Prescribe", new { appointmentId = Model.Id })" class="btn btn-success">
-                            <i class="fas fa-prescription"></i> Prescribe
-                        </a>
+                        var isScreening = Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:");
+                        if (!isScreening)
+                        {
+                            <a href="@Url.Action("Prescribe", new { appointmentId = Model.Id })" class="btn btn-success">
+                                <i class="fas fa-prescription"></i> Prescribe
+                            </a>
+                        }
                         <form asp-action="CompleteAppointment" method="post" style="display:inline;">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.Id" />
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-check-double"></i> Complete Consultation
+                                <i class="fas fa-check-double"></i> @(isScreening ? "Complete Health Screening" : "Complete Consultation")
                             </button>
                         </form>
                     }
@@ -204,7 +222,7 @@
                         <i class="fas fa-history"></i> View Patient History
                     </a>
                     <a href="@Url.Action("CreateReferral", new { patientId = Model.PatientId })" class="btn btn-outline">
-                        <i class="fas fa-share-alt"></i> Create Referral
+                        <i class="fas fa-share-alt"></i> @(Model.ReasonForVisit != null && Model.ReasonForVisit.StartsWith("Health Screening:") ? "Refer to Specialist" : "Create Referral")
                     </a>
                     <a href="@Url.Action("Appointments")" class="btn btn-outline">Back to List</a>
                 </div>
@@ -365,6 +383,30 @@
             margin-bottom: 20px;
         }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+
+        /* Health Screening Banner details */
+        .package-banner-card {
+            background: #f0f7ff;
+            border: 1px solid #cce3ff;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .package-banner-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #003366;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
 
         @@media (max-width: 768px) {
             .details-grid {

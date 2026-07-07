@@ -25,18 +25,40 @@
         <div class="booking-card">
             <form asp-action="BookAppointment" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="PackageName" />
+                <input type="hidden" asp-for="PackagePrice" />
 
-                <!-- Step 1: Select Doctor -->
-                <div class="form-step">
-                    <h4>Step 1: Select Doctor</h4>
-                    <div class="form-group">
-                        <label asp-for="DoctorId"></label>
-                        <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
-                            <option value="">-- Select a Doctor --</option>
-                        </select>
-                        <span asp-validation-for="DoctorId" class="text-danger"></span>
+                <!-- Step 1: Select Doctor or Display Package -->
+                @if (Model.PackagePrice.HasValue)
+                {
+                    <div class="form-step">
+                        <h4>Selected Health Package</h4>
+                        <div class="package-selected-card">
+                            <div class="package-info-pill">
+                                <i class="fas fa-heartbeat"></i>
+                                <div>
+                                    <div class="p-title">@Model.PackageName</div>
+                                    <div class="p-price">RM @Model.PackagePrice?.ToString("N2")</div>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0" style="font-size: 0.85rem;"><i class="fas fa-info-circle"></i> Date and time selection is used to secure your slot at our health screening wellness center.</p>
+                        </div>
+                        <input type="hidden" asp-for="DoctorId" id="DoctorId" />
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="form-step">
+                        <h4>Step 1: Select Doctor</h4>
+                        <div class="form-group">
+                            <label asp-for="DoctorId"></label>
+                            <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control" id="DoctorId">
+                                <option value="">-- Select a Doctor --</option>
+                            </select>
+                            <span asp-validation-for="DoctorId" class="text-danger"></span>
+                        </div>
+                    </div>
+                }
 
                 <!-- Step 2: Select Date & Time -->
                 <div class="form-step">
@@ -45,6 +67,14 @@
                         <label>Appointment Date</label>
                         <input id="AppointmentDatePicker" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
                         <small class="form-text text-muted">Please select your preferred date first.</small>
+                        
+                        @if (Model.AvailableDayNames != null && Model.AvailableDayNames.Any())
+                        {
+                            <div class="alert alert-info mt-2 py-2 px-3" style="font-size: 0.85rem; background: #eef5fc; border-color: #d0e3f5; color: #0056a7; border-radius: 8px;">
+                                <i class="fas fa-calendar-alt me-1"></i> Available days for this service: 
+                                <strong>@string.Join(", ", Model.AvailableDayNames)</strong>
+                            </div>
+                        }
                     </div>
 
                     <div class="form-group mt-3" id="slotSection" style="display: none;">
@@ -251,6 +281,34 @@
             color: #adb5bd;
             cursor: not-allowed;
         }
+
+        /* Health Screening Package Card UI */
+        .package-selected-card {
+            background: #f4f8fc;
+            border: 1px solid #d0e3f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .package-info-pill {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .package-info-pill i {
+            font-size: 2.2rem;
+            color: #0056a7;
+        }
+        .package-info-pill .p-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #003366;
+            display: block;
+        }
+        .package-info-pill .p-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0056a7;
+        }
     </style>
 }
 
@@ -267,6 +325,8 @@
             const taxDisplay = document.getElementById("taxDisplay");
             const totalDisplay = document.getElementById("totalDisplay");
 
+            const isPackage = @(Model.PackagePrice.HasValue ? "true" : "false");
+            const availableDays = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AvailableDaysOfWeek));
             let selectedTime = null;
 
             async function updateAvailableSlots() {
@@ -279,6 +339,21 @@
                     selectedTime = null;
                     hiddenDateInput.value = "";
                     return;
+                }
+
+                // Verify Day of Week against Doctor schedules (0=Sunday, 1=Monday... 6=Saturday)
+                if (availableDays && availableDays.length > 0) {
+                    const dateParts = dateVal.split('-');
+                    const localDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                    const selectedDayOfWeek = localDate.getDay();
+
+                    if (!availableDays.includes(selectedDayOfWeek)) {
+                        slotSection.style.display = "block";
+                        slotsContainer.innerHTML = '<span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> The specialized doctor for this screening is not available on this day. Please select a different date.</span>';
+                        selectedTime = null;
+                        hiddenDateInput.value = "";
+                        return;
+                    }
                 }
 
                 try {
@@ -319,6 +394,17 @@
             }
 
             async function updateFeeSummary() {
+                if (isPackage) {
+                    const fee = parseFloat("@(Model.PackagePrice ?? 0)");
+                    const tax = fee * 0.06;
+                    const total = fee + tax;
+
+                    feeDisplay.textContent = fee.toFixed(2);
+                    taxDisplay.textContent = tax.toFixed(2);
+                    totalDisplay.textContent = total.toFixed(2);
+                    return;
+                }
+
                 const doctorId = doctorSelect.value;
                 if (!doctorId) {
                     feeDisplay.textContent = "0.00";
@@ -344,16 +430,23 @@
                 }
             }
 
-            doctorSelect.addEventListener("change", function () {
-                updateFeeSummary();
-                updateAvailableSlots();
-            });
+            if (!isPackage) {
+                doctorSelect.addEventListener("change", function () {
+                    updateFeeSummary();
+                    updateAvailableSlots();
+                });
+            }
+            
             datePicker.addEventListener("change", updateAvailableSlots);
 
             // Initial restore check
-            if (doctorSelect.value) {
+            if (isPackage || doctorSelect.value) {
                 updateFeeSummary();
                 
+                if (isPackage) {
+                    updateAvailableSlots();
+                }
+
                 if (hiddenDateInput.value) {
                     const dt = new Date(hiddenDateInput.value);
                     if (!isNaN(dt.getTime())) {
