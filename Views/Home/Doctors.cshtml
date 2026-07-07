@@ -57,7 +57,26 @@
                                 </div>
                                 <p class="location"><i class="fas fa-map-marker-alt"></i> @(doctor.ClinicName ?? "MediCloud Hospital")</p>
                                 <p class="fee">Consultation: RM @doctor.ConsultationFee.ToString("F2")</p>
-                                <a href="@Url.Action("BookAppointment", "Patient", new { doctorId = doctor.Id })" class="btn btn-primary btn-block">Book Appointment</a>
+                                @if (User.Identity.IsAuthenticated && User.IsInRole("Doctor"))
+                                {
+                                    <span class="btn btn-outline-secondary btn-block disabled" style="border: 1px dashed #6c757d; color: #6c757d;">
+                                        <i class="fas fa-user-md me-1"></i> Referral Destination
+                                    </span>
+                                }
+                                else if (User.Identity.IsAuthenticated && User.IsInRole("Receptionist"))
+                                {
+                                    <a href="@Url.Action("BookAppointment", "Receptionist", new { doctorId = doctor.Id })" class="btn btn-primary btn-block">
+                                        <i class="fas fa-calendar-plus me-1"></i> Book Appointment (Receptionist)
+                                    </a>
+                                }
+                                else if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                                {
+                                    <button class="btn btn-secondary btn-block" disabled>Admin View</button>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("BookAppointment", "Patient", new { doctorId = doctor.Id })" class="btn btn-primary btn-block">Book Appointment</a>
+                                }
                             </div>
                         </div>
                     </div>
