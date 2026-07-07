@@ -1,0 +1,65 @@
+## Ignore Visual Studio Temporary Files, Build Results, and individual developer settings.
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/ActiveWriter)
+*.userprefs
+
+# Mono generated files
+*.meta
+
+# VS Code files
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/code-workspace
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leases/
+x64/
+x86/
+[Bb]uild/
+bld/
+[Bb]in/
+[Oo]bj/
+[Log]/
+
+# Visual Studio 2015/2017/2019/2022 cache directory
+.vs/
+# Target cleanup
+Recipes/
+
+# MSTest test Results
+[T]est[R]esult*/
+[B]uild[L]og.*
+
+# NUnit
+*.VisualState.xml
+TestResult.xml
+
+# Build Performance Diagnostic Logs
+*.html
+*.sarif
+
+# OpenCover
+pdf/
+
+# Rider
+.idea/
+*.sln.DotSettings.user
+
+# Publish output
+publish/
+
+# local settings (environment variables, appsettings.local.json)
+appsettings.local.json
