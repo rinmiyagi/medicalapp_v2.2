@@ -75,7 +75,7 @@
                                     }
                                     @if (User.IsInRole("Doctor"))
                                     {
-                                        <a href="@Url.Action("PatientHistory", "Doctor")">
+                                        <a href="@Url.Action("MyPatients", "Doctor")">
                                             <i class="fas fa-notes-medical"></i> EMR
                                         </a>
                                         <a href="@Url.Action("MyReferrals", "Doctor")">

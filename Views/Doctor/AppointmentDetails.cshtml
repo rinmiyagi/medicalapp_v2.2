@@ -46,6 +46,38 @@
                 </div>
             </div>
 
+            <!-- Related Referral Information (If any) -->
+            @if (ViewBag.ActiveReferral != null)
+            {
+                var referral = ViewBag.ActiveReferral as medicalapp.Models.Referral;
+                <div class="section referral-section" style="background: #eef5fc; border-left: 4px solid #0056a7; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                    <h3 style="color: #003366; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-share-alt text-primary"></i> Related Referral Information
+                    </h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Referred From</span>
+                            <span class="detail-value">Dr. @referral.FromDoctor?.User?.FirstName @referral.FromDoctor?.User?.LastName (@referral.FromDoctor?.Specialization)</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Sent Date</span>
+                            <span class="detail-value">@referral.CreatedAt.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Reason for Referral</span>
+                            <span class="detail-value">@referral.Reason</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(referral.Notes))
+                        {
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Referral Notes</span>
+                                <span class="detail-value">@referral.Notes</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
             <!-- Appointment Information -->
             <div class="section">
                 <h3>📅 Appointment Information</h3>
@@ -170,6 +202,9 @@
                     }
                     <a href="@Url.Action("PatientHistory", new { patientId = Model.PatientId })" class="btn btn-outline">
                         <i class="fas fa-history"></i> View Patient History
+                    </a>
+                    <a href="@Url.Action("CreateReferral", new { patientId = Model.PatientId })" class="btn btn-outline">
+                        <i class="fas fa-share-alt"></i> Create Referral
                     </a>
                     <a href="@Url.Action("Appointments")" class="btn btn-outline">Back to List</a>
                 </div>
