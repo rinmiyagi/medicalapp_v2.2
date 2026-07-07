@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-utilities.min.css" />
     <link rel="stylesheet" href="~/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
@@ -17,101 +19,103 @@
                 <span>MediCloud</span>
                 <span class="hospital-badge">Hospital</span>
             </div>
-            <ul class="nav-links">
-                <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
-                <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
-                <li><a href="@Url.Action("Services", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
-                <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
-                <li><a href="@Url.Action("Contact", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
-            </ul>
-            <div class="nav-right">
-                <span class="header-date">
-                    <i class="fas fa-calendar-alt"></i>
-                    @DateTime.Now.ToString("dddd, dd MMM yyyy")
-                </span>
-                <div class="nav-buttons">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        @if (User.IsInRole("Patient"))
+            
+            <button class="navbar-toggler" type="button" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="navbar-collapse" id="navbarCollapse">
+                <ul class="nav-links">
+                    <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">Home</a></li>
+                    <li><a href="@Url.Action("Doctors", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Doctors" ? "active" : "")">Find a Doctor</a></li>
+                    <li><a href="@Url.Action("Services", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Services" ? "active" : "")">Our Services</a></li>
+                    <li><a href="@Url.Action("Packages", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Packages" ? "active" : "")">Health Packages</a></li>
+                    <li><a href="@Url.Action("Contact", "Home")" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")">Contact Us</a></li>
+                </ul>
+                <div class="nav-right">
+                    <div class="nav-buttons">
+                        @if (User.Identity.IsAuthenticated)
                         {
-                            <a href="@Url.Action("Dashboard", "Patient")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-user-md"></i> Dashboard
-                            </a>
-                            <a href="@Url.Action("Appointments", "Patient")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-calendar-check"></i> Appointments
-                            </a>
-                            <a href="@Url.Action("MyInvoices", "Invoice")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-file-invoice"></i> My Invoices
-                            </a>
+                            @if (User.IsInRole("Patient"))
+                            {
+                                <a href="@Url.Action("Dashboard", "Patient")" class="btn btn-primary">
+                                    <i class="fas fa-user-md"></i> Dashboard
+                                </a>
+                            }
+                            @if (User.IsInRole("Doctor"))
+                            {
+                                <a href="@Url.Action("Dashboard", "Doctor")" class="btn btn-primary">
+                                    <i class="fas fa-stethoscope"></i> Dashboard
+                                </a>
+                            }
+                            @if (User.IsInRole("Receptionist"))
+                            {
+                                <a href="@Url.Action("Dashboard", "Receptionist")" class="btn btn-primary">
+                                    <i class="fas fa-headset"></i> Dashboard
+                                </a>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-primary">
+                                    <i class="fas fa-crown"></i> Admin
+                                </a>
+                            }
+
+                            <!-- User Dropdown Menu -->
+                            <div class="user-dropdown">
+                                <button class="dropdown-toggle" type="button" onclick="toggleUserDropdown(event)">
+                                    <i class="fas fa-user-circle"></i> @User.Identity.Name <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
+                                </button>
+                                <div class="dropdown-menu" id="userDropdownMenu">
+                                    @if (User.IsInRole("Patient"))
+                                    {
+                                        <a href="@Url.Action("MyInvoices", "Invoice")">
+                                            <i class="fas fa-file-invoice"></i> My Invoices
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Doctor"))
+                                    {
+                                        <a href="@Url.Action("PatientHistory", "Doctor")">
+                                            <i class="fas fa-notes-medical"></i> EMR
+                                        </a>
+                                        <a href="@Url.Action("MyReferrals", "Doctor")">
+                                            <i class="fas fa-share-alt"></i> Referrals
+                                            @if (ViewBag.PendingReferrals > 0)
+                                            {
+                                                <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
+                                            }
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a href="@Url.Action("Users", "Admin")">
+                                            <i class="fas fa-users-cog"></i> Users
+                                        </a>
+                                        <a href="@Url.Action("PendingDoctors", "Admin")">
+                                            <i class="fas fa-user-check"></i> Verify Doctors
+                                        </a>
+                                        <a href="@Url.Action("CreateUser", "Admin")">
+                                            <i class="fas fa-user-plus"></i> Add User
+                                        </a>
+                                        <a href="@Url.Action("Index", "Invoice")">
+                                            <i class="fas fa-file-invoice"></i> Invoices
+                                        </a>
+                                    }
+                                    <div class="dropdown-divider"></div>
+                                    <form asp-action="Logout" asp-controller="Account" method="post" style="display:block; margin:0;">
+                                        <button type="submit" class="dropdown-item-logout">
+                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         }
-                        @if (User.IsInRole("Doctor"))
+                        else
                         {
-                            <a href="@Url.Action("Dashboard", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-stethoscope"></i> Dashboard
-                            </a>
-                            <a href="@Url.Action("Appointments", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-calendar-check"></i> Appointments
-                            </a>
-                            <a href="@Url.Action("PatientHistory", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-notes-medical"></i> EMR
-                            </a>
-                            <a href="@Url.Action("MyReferrals", "Doctor")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-share-alt"></i> Referrals
-                                @if (ViewBag.PendingReferrals > 0)
-                                {
-                                    <span class="badge badge-danger">@ViewBag.PendingReferrals</span>
-                                }
-                            </a>
-
-
+                            <a href="@Url.Action("Login", "Account")" class="btn btn-outline">Login</a>
+                            <a href="@Url.Action("Register", "Account")" class="btn btn-primary">Register</a>
                         }
-                        @if (User.IsInRole("Receptionist"))
-                        {
-                            <a href="@Url.Action("Dashboard", "Receptionist")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-headset"></i> Dashboard
-                            </a>
-                            <a href="@Url.Action("AllAppointments", "Receptionist")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-calendar-alt"></i> Schedule
-                            </a>
-                            <a href="@Url.Action("AllAppointments", "Receptionist")" class="btn btn-outline">
-                                <i class="fas fa-calendar-alt"></i> Schedule
-                            </a>
-
-
-                        }
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-crown"></i> Admin
-                            </a>
-                            <a href="@Url.Action("Users", "Admin")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-users-cog"></i> Users
-                            </a>
-                            <a href="@Url.Action("PendingDoctors", "Admin")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-user-check"></i> Verify
-                            </a>
-                            <a href="@Url.Action("CreateUser", "Admin")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-user-plus"></i> Add User
-                            </a>
-                            <a href="@Url.Action("Index", "Invoice")" class="btn btn-outline" style="margin-right: 8px;">
-                                <i class="fas fa-file-invoice"></i> Invoices
-                            </a>
-
-
-                        }
-
-                        <span class="navbar-text">
-                            <i class="fas fa-user-circle"></i> @User.Identity.Name
-                        </span>
-                        <form asp-action="Logout" asp-controller="Account" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-outline" style="background:transparent; border:1px solid #0056a7; color:#0056a7; padding:8px 20px; border-radius:25px; cursor:pointer;">Logout</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <a href="@Url.Action("Login", "Account")" class="btn btn-outline">Login</a>
-                        <a href="@Url.Action("Register", "Account")" class="btn btn-primary">Register</a>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
