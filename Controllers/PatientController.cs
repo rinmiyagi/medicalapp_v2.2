@@ -155,6 +155,50 @@ namespace medicalapp.Controllers
                 var startTime = model.AppointmentDate.TimeOfDay;
                 var endTime = startTime.Add(TimeSpan.FromMinutes(30));
 
+                var dayOfWeek = model.AppointmentDate.DayOfWeek;
+                var schedule = await _context.Schedules
+                    .FirstOrDefaultAsync(s => s.DoctorId == model.DoctorId && 
+                                              s.DayOfWeek == dayOfWeek && 
+                                              s.IsAvailable &&
+                                              s.StartTime <= startTime && 
+                                              endTime <= s.EndTime);
+
+                if (schedule == null)
+                {
+                    ModelState.AddModelError("AppointmentDate", "The selected time is outside of the doctor's scheduled hours.");
+                    model.Doctors = await _context.Doctors
+                        .Include(d => d.User)
+                        .Where(d => d.IsVerified)
+                        .Select(d => new SelectListItem
+                        {
+                            Value = d.Id.ToString(),
+                            Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+                        })
+                        .ToListAsync();
+                    return View(model);
+                }
+
+                var isOverlapping = await _context.Appointments
+                    .AnyAsync(a => a.DoctorId == model.DoctorId && 
+                                   a.AppointmentDate.Date == model.AppointmentDate.Date && 
+                                   a.StartTime == startTime && 
+                                   a.Status != "Cancelled");
+
+                if (isOverlapping)
+                {
+                    ModelState.AddModelError("AppointmentDate", "This time slot has already been booked. Please choose another time.");
+                    model.Doctors = await _context.Doctors
+                        .Include(d => d.User)
+                        .Where(d => d.IsVerified)
+                        .Select(d => new SelectListItem
+                        {
+                            Value = d.Id.ToString(),
+                            Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+                        })
+                        .ToListAsync();
+                    return View(model);
+                }
+
                 var appointment = new Appointment
                 {
                     PatientId = patient.Id,
@@ -355,6 +399,56 @@ namespace medicalapp.Controllers
                 return NotFound();
             }
             return Json(new { fee = doctor.ConsultationFee });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAvailableSlots(int doctorId, string date)
+        {
+            if (doctorId <= 0 || string.IsNullOrEmpty(date))
+            {
+                return BadRequest("Invalid doctor or date.");
+            }
+
+            if (!DateTime.TryParse(date, out DateTime parsedDate))
+            {
+                return BadRequest("Invalid date format.");
+            }
+
+            var dayOfWeek = parsedDate.DayOfWeek;
+
+            var schedules = await _context.Schedules
+                .Where(s => s.DoctorId == doctorId && s.DayOfWeek == dayOfWeek && s.IsAvailable)
+                .ToListAsync();
+
+            var availableSlots = new List<string>();
+
+            if (!schedules.Any())
+            {
+                return Json(availableSlots);
+            }
+
+            var existingAppointments = await _context.Appointments
+                .Where(a => a.DoctorId == doctorId && 
+                            a.AppointmentDate.Date == parsedDate.Date && 
+                            a.Status != "Cancelled")
+                .Select(a => a.StartTime)
+                .ToListAsync();
+
+            foreach (var schedule in schedules)
+            {
+                var current = schedule.StartTime;
+                while (current < schedule.EndTime)
+                {
+                    if (!existingAppointments.Contains(current))
+                    {
+                        availableSlots.Add(current.ToString(@"hh\:mm"));
+                    }
+                    current = current.Add(TimeSpan.FromMinutes(schedule.SlotDuration));
+                }
+            }
+
+            var result = availableSlots.Distinct().OrderBy(s => s).ToList();
+            return Json(result);
         }
     }
 }

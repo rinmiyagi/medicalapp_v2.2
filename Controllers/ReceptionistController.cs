@@ -116,6 +116,66 @@ namespace medicalapp.Controllers
             var startTime = model.AppointmentDate.TimeOfDay;
             var endTime = startTime.Add(TimeSpan.FromMinutes(30));
 
+            var dayOfWeek = model.AppointmentDate.DayOfWeek;
+            var schedule = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.DoctorId == model.DoctorId && 
+                                          s.DayOfWeek == dayOfWeek && 
+                                          s.IsAvailable &&
+                                          s.StartTime <= startTime && 
+                                          endTime <= s.EndTime);
+
+            if (schedule == null)
+            {
+                ModelState.AddModelError("AppointmentDate", "The selected time is outside of the doctor's scheduled hours.");
+                model.Patients = await _context.Patients
+                    .Include(p => p.User)
+                    .Select(p => new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = $"{p.User.FirstName} {p.User.LastName} ({p.User.Email})"
+                    })
+                    .ToListAsync();
+                model.Doctors = await _context.Doctors
+                    .Include(d => d.User)
+                    .Where(d => d.IsVerified)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+                    })
+                    .ToListAsync();
+                return View(model);
+            }
+
+            var isOverlapping = await _context.Appointments
+                .AnyAsync(a => a.DoctorId == model.DoctorId && 
+                               a.AppointmentDate.Date == model.AppointmentDate.Date && 
+                               a.StartTime == startTime && 
+                               a.Status != "Cancelled");
+
+            if (isOverlapping)
+            {
+                ModelState.AddModelError("AppointmentDate", "This time slot has already been booked. Please choose another time.");
+                model.Patients = await _context.Patients
+                    .Include(p => p.User)
+                    .Select(p => new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = $"{p.User.FirstName} {p.User.LastName} ({p.User.Email})"
+                    })
+                    .ToListAsync();
+                model.Doctors = await _context.Doctors
+                    .Include(d => d.User)
+                    .Where(d => d.IsVerified)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = $"Dr. {d.User.FirstName} {d.User.LastName} - {d.Specialization}"
+                    })
+                    .ToListAsync();
+                return View(model);
+            }
+
             var appointment = new Appointment
             {
                 PatientId = model.PatientId,

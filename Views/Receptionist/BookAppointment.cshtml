@@ -36,8 +36,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="AppointmentDate"></label>
-                    <input asp-for="AppointmentDate" class="form-control" type="datetime-local" />
+                    <label>Appointment Date</label>
+                    <input id="AppointmentDatePicker" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <small class="form-text text-muted">Please select preferred date first.</small>
+                </div>
+
+                <div class="form-group mt-3" id="slotSection" style="display: none;">
+                    <label class="fw-bold d-block mb-2">Available Time Slots</label>
+                    <div id="slotsContainer" class="d-flex flex-wrap gap-2">
+                        <!-- Dynamic Slots Buttons -->
+                    </div>
+                    <input type="hidden" asp-for="AppointmentDate" id="AppointmentDateHidden" />
                     <span asp-validation-for="AppointmentDate" class="text-danger"></span>
                 </div>
 
@@ -118,5 +127,116 @@
         }
         .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .text-danger { color: #dc3545; font-size: 0.9rem; }
+
+        .slot-btn {
+            border: 1px solid #dee2e6;
+            background-color: #fff;
+            color: #495057;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .slot-btn:hover:not(:disabled) {
+            border-color: #0056a7;
+            color: #0056a7;
+            background-color: #eef5fc;
+        }
+        .slot-btn.active {
+            background-color: #0056a7 !important;
+            border-color: #0056a7 !important;
+            color: #fff !important;
+        }
+        .slot-btn:disabled {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+        .gap-2 { gap: 0.5rem; }
     </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const doctorSelect = document.getElementById("DoctorId");
+            const datePicker = document.getElementById("AppointmentDatePicker");
+            const slotSection = document.getElementById("slotSection");
+            const slotsContainer = document.getElementById("slotsContainer");
+            const hiddenDateInput = document.getElementById("AppointmentDateHidden");
+
+            let selectedTime = null;
+
+            async function updateAvailableSlots() {
+                const doctorId = doctorSelect.value;
+                const dateVal = datePicker.value;
+
+                if (!doctorId || !dateVal) {
+                    slotSection.style.display = "none";
+                    slotsContainer.innerHTML = "";
+                    selectedTime = null;
+                    hiddenDateInput.value = "";
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/Patient/GetAvailableSlots?doctorId=${doctorId}&date=${dateVal}`);
+                    if (response.ok) {
+                        const slots = await response.json();
+                        slotsContainer.innerHTML = "";
+                        
+                        if (slots && slots.length > 0) {
+                            slots.forEach(slot => {
+                                const btn = document.createElement("button");
+                                btn.type = "button";
+                                btn.className = "btn slot-btn";
+                                btn.textContent = slot;
+                                btn.dataset.time = slot;
+                                
+                                if (selectedTime === slot) {
+                                    btn.classList.add("active");
+                                }
+
+                                btn.addEventListener("click", function () {
+                                    document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("active"));
+                                    btn.classList.add("active");
+                                    selectedTime = slot;
+                                    hiddenDateInput.value = `${dateVal}T${slot}:00`;
+                                });
+
+                                slotsContainer.appendChild(btn);
+                            });
+                        } else {
+                            slotsContainer.innerHTML = '<span class="text-danger fw-bold">No available working hours found for this doctor on this day.</span>';
+                        }
+                        slotSection.style.display = "block";
+                    }
+                } catch (error) {
+                    console.error("Error fetching slots:", error);
+                }
+            }
+
+            doctorSelect.addEventListener("change", updateAvailableSlots);
+            datePicker.addEventListener("change", updateAvailableSlots);
+
+            // Initial check on load
+            if (doctorSelect.value && hiddenDateInput.value) {
+                const dt = new Date(hiddenDateInput.value);
+                if (!isNaN(dt.getTime())) {
+                    const yyyy = dt.getFullYear();
+                    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+                    const dd = String(dt.getDate()).padStart(2, '0');
+                    datePicker.value = `${yyyy}-${mm}-${dd}`;
+                    
+                    const hh = String(dt.getHours()).padStart(2, '0');
+                    const min = String(dt.getMinutes()).padStart(2, '0');
+                    selectedTime = `${hh}:${min}`;
+                    
+                    updateAvailableSlots();
+                }
+            }
+        });
+    </script>
 }
