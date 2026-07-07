@@ -57,7 +57,7 @@
                                 </div>
                                 <p class="location"><i class="fas fa-map-marker-alt"></i> @(doctor.ClinicName ?? "MediCloud Hospital")</p>
                                 <p class="fee">Consultation: RM @doctor.ConsultationFee.ToString("F2")</p>
-                                <a href="#" class="btn btn-primary btn-block">Book Appointment</a>
+                                <a href="@Url.Action("BookAppointment", "Patient", new { doctorId = doctor.Id })" class="btn btn-primary btn-block">Book Appointment</a>
                             </div>
                         </div>
                     </div>
