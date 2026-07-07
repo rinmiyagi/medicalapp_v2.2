@@ -240,7 +240,7 @@ namespace medicalapp.Controllers
         }
 
         // GET: My Appointments
-        public async Task<IActionResult> Appointments()
+        public async Task<IActionResult> Appointments(string status = "all")
         {
             var user = await _userManager.GetUserAsync(User);
             var patient = await _context.Patients
@@ -254,7 +254,18 @@ namespace medicalapp.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            return View(patient.Appointments ?? new List<Appointment>());
+            ViewBag.CurrentStatus = status;
+
+            var appointments = patient.Appointments ?? new List<Appointment>();
+
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                appointments = appointments
+                    .Where(a => a.Status.Equals(status, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            return View(appointments.OrderByDescending(a => a.AppointmentDate).ToList());
         }
 
         // GET: Request Medical Report
@@ -449,6 +460,30 @@ namespace medicalapp.Controllers
 
             var result = availableSlots.Distinct().OrderBy(s => s).ToList();
             return Json(result);
+        }
+
+        // GET: Patient/AppointmentDetails/5
+        [HttpGet]
+        public async Task<IActionResult> AppointmentDetails(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (patient == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var appointment = await _context.Appointments
+                .Include(a => a.Doctor)
+                    .ThenInclude(d => d.User)
+                .FirstOrDefaultAsync(a => a.Id == id && a.PatientId == patient.Id);
+
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            return View(appointment);
         }
     }
 }

@@ -9,12 +9,16 @@
     <div class="container">
         <h2>📋 My Appointments</h2>
 
+        <!-- Filter Tabs -->
+        @{
+            var currentStatus = ViewBag.CurrentStatus as string ?? "all";
+        }
         <div class="filter-tabs">
-            <a href="#" class="filter-tab active" data-filter="all">All</a>
-            <a href="#" class="filter-tab" data-filter="pending">Pending</a>
-            <a href="#" class="filter-tab" data-filter="confirmed">Confirmed</a>
-            <a href="#" class="filter-tab" data-filter="completed">Completed</a>
-            <a href="#" class="filter-tab" data-filter="cancelled">Cancelled</a>
+            <a href="@Url.Action("Appointments", new { status = "all" })" class="filter-tab @(currentStatus == "all" ? "active" : "")">All</a>
+            <a href="@Url.Action("Appointments", new { status = "pending" })" class="filter-tab @(currentStatus == "pending" ? "active" : "")">Pending</a>
+            <a href="@Url.Action("Appointments", new { status = "confirmed" })" class="filter-tab @(currentStatus == "confirmed" ? "active" : "")">Confirmed</a>
+            <a href="@Url.Action("Appointments", new { status = "completed" })" class="filter-tab @(currentStatus == "completed" ? "active" : "")">Completed</a>
+            <a href="@Url.Action("Appointments", new { status = "cancelled" })" class="filter-tab @(currentStatus == "cancelled" ? "active" : "")">Cancelled</a>
         </div>
 
         @if (Model.Any())
@@ -33,10 +37,13 @@
                             <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
                         </div>
                         <div class="appointment-actions">
-                            <a href="#" class="btn btn-sm btn-outline">View Details</a>
+                            <a href="@Url.Action("AppointmentDetails", "Patient", new { id = appt.Id })" class="btn btn-sm btn-outline">View Details</a>
                             @if (appt.Status == "Pending" || appt.Status == "Confirmed")
                             {
-                                <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                                <form id="cancel-form-@appt.Id" asp-action="CancelAppointment" asp-route-id="@appt.Id" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="showConfirm('Cancel Appointment', 'Are you sure you want to cancel this appointment? This action cannot be undone.', () => document.getElementById('cancel-form-@appt.Id').submit())">Cancel</button>
+                                </form>
                             }
                         </div>
                     </div>
