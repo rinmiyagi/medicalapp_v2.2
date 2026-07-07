@@ -251,11 +251,11 @@ body {
     background: #f4f6f9;
 }
 
-.department-grid {
+/* .department-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-}
+} */
 
 .dept-card {
     background: #fff;
@@ -303,11 +303,11 @@ body {
     padding: 80px 0;
 }
 
-.package-grid {
+/* .package-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
-}
+} */
 
 .package-card {
     background: #fff;
@@ -704,4 +704,235 @@ body {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* ==========================================================================
+   Find a Doctor Page Styles (Phase 5 Extension)
+   ========================================================================== */
+
+/* Search Section */
+.search-section {
+    padding: 50px 0;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.search-box {
+    max-width: 600px;
+    margin: 0 auto 25px;
+    display: flex;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    border-radius: 30px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+    border-color: #0056a7;
+    box-shadow: 0 8px 24px rgba(0, 86, 167, 0.12);
+}
+
+.search-box input {
+    flex: 1;
+    border: none;
+    padding: 15px 25px;
+    font-size: 1rem;
+    outline: none;
+    color: #495057;
+    background: transparent;
+}
+
+.search-box input::placeholder {
+    color: #adb5bd;
+}
+
+.search-box button {
+    background: #0056a7;
+    color: #fff;
+    border: none;
+    padding: 0 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-box button:hover {
+    background: #003d7a;
+}
+
+/* Filter Tags */
+.filter-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.filter-tag {
+    padding: 8px 20px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.filter-tag:hover {
+    background: #f1f3f5;
+    border-color: #ced4da;
+}
+
+.filter-tag.active {
+    background: #0056a7;
+    color: #fff;
+    border-color: #0056a7;
+    box-shadow: 0 4px 12px rgba(0, 86, 167, 0.2);
+}
+
+/* Doctor Grid Section */
+.doctor-grid-section {
+    padding: 60px 0;
+    background: #f4f6f9;
+}
+
+/* Doctor Card */
+.doctor-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 86, 167, 0.08);
+    border-color: rgba(0, 86, 167, 0.15);
+}
+
+.doctor-image {
+    position: relative;
+    height: 240px;
+    background: linear-gradient(135deg, #eef5fc 0%, #d2e4f7 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.doctor-card:hover .doctor-image img {
+    transform: scale(1.05);
+}
+
+/* Fallback avatar icon inside doctor-image in case of image load error */
+.doctor-image::before {
+    content: "\f222"; /* FontAwesome user-md icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 5rem;
+    color: rgba(0, 86, 167, 0.15);
+    position: absolute;
+    z-index: 1;
+}
+
+.doctor-info {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.doctor-info h3 {
+    font-size: 1.25rem;
+    color: #003366;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.doctor-info .specialty {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0056a7;
+    background: #eef5fc;
+    padding: 4px 12px;
+    border-radius: 12px;
+    align-self: flex-start;
+    margin-bottom: 12px;
+}
+
+.doctor-info .experience {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 12px;
+}
+
+.doctor-info .rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.doctor-info .rating i {
+    color: #ffc107;
+}
+
+.doctor-info .rating span {
+    margin-left: 3px;
+}
+
+.doctor-info .location,
+.doctor-info .fee {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doctor-info .location i,
+.doctor-info .fee i {
+    color: #0056a7;
+    width: 16px;
+    text-align: center;
+}
+
+.doctor-info .fee {
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.doctor-info .btn-block {
+    margin-top: auto;
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
 }

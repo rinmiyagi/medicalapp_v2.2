@@ -1,17 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using medicalapp.Data;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace medicalapp.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Doctors()
+        public async Task<IActionResult> Doctors()
         {
-            return View();
+            var doctors = await _context.Doctors
+                .Include(d => d.User)
+                .Where(d => d.IsVerified)
+                .ToListAsync();
+
+            return View(doctors);
         }
 
         public IActionResult Services()
