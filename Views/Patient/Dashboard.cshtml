@@ -7,6 +7,15 @@
 
 <div class="patient-container">
     <div class="container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+
         <h2>Welcome back, @Model.FullName! 👋</h2>
         <p class="text-muted">Here's a quick overview of your health journey</p>
 
@@ -44,13 +53,13 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <a href="@Url.Action("BookAppointment")" class="btn btn-primary">
+            <a href="@Url.Action("BookAppointment", "Patient")" class="btn btn-primary">
                 <i class="fas fa-plus-circle"></i> Book New Appointment
             </a>
-            <a href="@Url.Action("Appointments")" class="btn btn-outline">
+            <a href="@Url.Action("Appointments", "Patient")" class="btn btn-outline">
                 <i class="fas fa-list"></i> View All Appointments
             </a>
-            <a href="@Url.Action("RequestMedicalReport")" class="btn btn-outline">
+            <a href="@Url.Action("RequestMedicalReport", "Patient")" class="btn btn-outline">
                 <i class="fas fa-file-medical"></i> Request Medical Report
             </a>
 
@@ -76,10 +85,23 @@
                                 <span class="status-badge @appt.Status.ToLower()">@appt.Status</span>
                             </div>
                             <div class="appointment-actions">
-                                <a href="#" class="btn btn-sm btn-outline">View Details</a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-outline view-details-btn"
+                                   data-doctor="Dr. @appt.Doctor.User.FirstName @appt.Doctor.User.LastName"
+                                   data-specialization="@appt.Doctor.Specialization"
+                                   data-date="@appt.AppointmentDate.ToString("dd MMM yyyy")"
+                                   data-time="@appt.StartTime.ToString(@"hh\:mm") - @appt.EndTime.ToString(@"hh\:mm")"
+                                   data-status="@appt.Status"
+                                   data-reason="@appt.ReasonForVisit"
+                                   data-symptoms="@appt.Symptoms"
+                                   data-amount="RM @appt.TotalAmount"
+                                   data-payment="@(appt.IsPaid ? "Paid" : "Unpaid")">View Details</a>
+
                                 @if (appt.Status == "Pending" || appt.Status == "Confirmed")
                                 {
-                                    <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                                    <form id="cancel-form-@appt.Id" asp-action="CancelAppointment" asp-route-id="@appt.Id" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="showConfirm('Cancel Appointment', 'Are you sure you want to cancel this appointment? This action cannot be undone.', () => document.getElementById('cancel-form-@appt.Id').submit())">Cancel</button>
+                                    </form>
                                 }
                             </div>
                         </div>
@@ -88,7 +110,7 @@
             }
             else
             {
-                <p class="empty-state">No upcoming appointments. <a href="@Url.Action("BookAppointment")">Book one now!</a></p>
+                <p class="empty-state">No upcoming appointments. <a href="@Url.Action("BookAppointment", "Patient")">Book one now!</a></p>
             }
         </div>
 
@@ -114,6 +136,26 @@
             {
                 <p class="empty-state">No active prescriptions.</p>
             }
+        </div>
+
+        <!-- Detail Modal Popup -->
+        <div id="detailModal" class="modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+            <div class="modal-content" style="background-color:#fff; padding:30px; border-radius:12px; max-width:500px; width:90%; position:relative; box-shadow: 0 5px 25px rgba(0,0,0,0.2); animation: zoomIn 0.3s;">
+                <span class="close-modal" style="position:absolute; right:20px; top:15px; font-size:1.8rem; color:#aaa; cursor:pointer;" onclick="$('#detailModal').fadeOut(200)">&times;</span>
+                <h3 style="color:#003366; margin-bottom:15px;"><i class="fas fa-file-medical"></i> Appointment Details</h3>
+                <hr style="border:0; border-top:1px solid #eee; margin-bottom:20px;" />
+                <div class="modal-body" style="font-size:0.95rem; line-height:1.8; color:#333;">
+                    <div style="margin-bottom:10px;"><strong>Doctor:</strong> <span id="modalDoctor"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Specialization:</strong> <span id="modalSpecialization"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Date:</strong> <span id="modalDate"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Time:</strong> <span id="modalTime"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Status:</strong> <span id="modalStatus" class="status-badge"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Reason for Visit:</strong> <div id="modalReason" style="background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; font-style:italic;"></div></div>
+                    <div style="margin-bottom:10px;"><strong>Symptoms:</strong> <div id="modalSymptoms" style="background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; font-style:italic;"></div></div>
+                    <div style="margin-bottom:10px;"><strong>Total Amount:</strong> <span id="modalAmount" style="font-weight:600; color:#0056a7;"></span></div>
+                    <div style="margin-bottom:10px;"><strong>Payment:</strong> <span id="modalPayment" style="font-weight:600;"></span></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -246,5 +288,42 @@
         .btn-sm { padding: 5px 12px; font-size: 0.85rem; }
         .btn-danger { background: #dc3545; color: white; border: none; }
         .btn-danger:hover { background: #c82333; }
+
+        /* Alert Styling */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Show details modal on click
+            $('.view-details-btn').on('click', function() {
+                const btn = $(this);
+                $('#modalDoctor').text(btn.data('doctor'));
+                $('#modalSpecialization').text(btn.data('specialization'));
+                $('#modalDate').text(btn.data('date'));
+                $('#modalTime').text(btn.data('time'));
+                
+                const status = btn.data('status');
+                $('#modalStatus').text(status).attr('class', 'status-badge ' + status.toLowerCase());
+                
+                $('#modalReason').text(btn.data('reason') || 'No reason provided.');
+                $('#modalSymptoms').text(btn.data('symptoms') || 'No symptoms reported.');
+                $('#modalAmount').text(btn.data('amount'));
+                
+                const payment = btn.data('payment');
+                $('#modalPayment').text(payment).css('color', payment === 'Paid' ? '#28a745' : '#dc3545');
+                
+                $('#detailModal').css('display', 'flex').hide().fadeIn(200);
+            });
+        });
+    </script>
 }

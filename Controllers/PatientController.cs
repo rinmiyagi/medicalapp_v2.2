@@ -308,5 +308,41 @@ namespace medicalapp.Controllers
             TempData["Success"] = "Your medical report request has been submitted to your selected doctor.";
             return RedirectToAction("Dashboard");
         }
+
+        // POST: Cancel Appointment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelAppointment(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (patient == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && a.PatientId == patient.Id);
+
+            if (appointment == null)
+            {
+                TempData["Error"] = "Appointment not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            if (appointment.Status == "Completed" || appointment.Status == "Cancelled")
+            {
+                TempData["Error"] = "This appointment cannot be cancelled.";
+                return RedirectToAction("Dashboard");
+            }
+
+            appointment.Status = "Cancelled";
+            appointment.UpdatedBy = user.Id;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Appointment cancelled successfully.";
+            return RedirectToAction("Dashboard");
+        }
     }
 }
